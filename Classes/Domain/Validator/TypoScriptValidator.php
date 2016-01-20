@@ -46,7 +46,8 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
     protected $supportedOptions = array(
         'className' => array('', 'Name of the controller class which should be validate', 'string'),
         'methodName' => array('', 'Name of the action method which should be validate', 'string'),
-        'argumentName' => array('', 'Name of the argument which should be validate', 'string')
+        'argumentName' => array('', 'Name of the argument which should be validate', 'string'),
+        'overwriteDefaultValidation' => array('', 'If TRUE the validation rules defined in the property, model or controller are overwritten (will not be executed).', 'boolean')
     );
 
     /**
@@ -64,5 +65,12 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
             $result = $this->settings[$className][$methodName][$argumentName];
         }
         return $result;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function overwriteDefaultValidation() {
+        return $this->options['overwriteDefaultValidation'];
     }
 }

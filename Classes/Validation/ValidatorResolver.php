@@ -76,13 +76,15 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
         $methodParameters = $this->reflectionService->getMethodParameters($className,$methodName);
         foreach ($methodParameters as $argumentName => $methodParameterValue) {
             if (isset($this->settings[$className][$methodName][$argumentName])) {
+                $overwriteDefaultValidation = isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation']) ? (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'] : FALSE;
                 array_push($validateAnnotations, array(
                     'argumentName' => $argumentName,
                     'validatorName' => 'Portrino\\PxValidation\\Domain\\Validator\\TypoScriptValidator',
                     'validatorOptions' => array(
                         'className' => $className,
                         'methodName' => $methodName,
-                        'argumentName' => $argumentName
+                        'argumentName' => $argumentName,
+                        'overwriteDefaultValidation' => $overwriteDefaultValidation
                     )
                 ));
             }

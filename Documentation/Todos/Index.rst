@@ -8,4 +8,4 @@
 Todos
 -----
 
-- disable validators via TS which are defined in vendor extensions to make it possible to override validation behaviour completely
+- allow overwrite of validation rules on model and property level - for now we are only be able to add validators on controller level

@@ -25,15 +25,16 @@ TypoScript values
 
 The typoScript keys are defined by the controller, action and argument tripel.
 
-===============================================================================  ===========  ===========================================================================================  =======
-TypoScript value                                                                 Data type    Description                                                                                  Default
-===============================================================================  ===========  ===========================================================================================  =======
-settings.[controllerName]                                                        string       Name (**namespace syntax!**) of the controller class which should be validate
-settings.[controllerName].[actionMethodName]                                     string       Name of the action method which should be validate
-settings.[controllerName].[actionMethodName].[argumentName]                      string       Name of the argument which should be validate
-settings.[controllerName].[actionMethodName].[argumentName].objectValidators     array        List of ObjectValidators
-settings.[controllerName].[actionMethodName].[argumentName].propertyValidators   array        List of PropertyValidators
-===============================================================================  ===========  ===========================================================================================  =======
+======================================================================================  ===========  ==================================================================================================  =========
+TypoScript value                                                                        Data type    Description                                                                                         Default
+======================================================================================  ===========  ==================================================================================================  =========
+settings.[controllerName]                                                               string       Name (**namespace syntax!**) of the controller class which should be validate
+settings.[controllerName].[actionMethodName]                                            string       Name of the action method which should be validate
+settings.[controllerName].[actionMethodName].[argumentName]                             string       Name of the argument which should be validate
+settings.[controllerName].[actionMethodName].[argumentName].overwriteDefaultValidation  boolean      If TRUE the default validation rules defined in the property, model or controller are not executed  FALSE (0)
+settings.[controllerName].[actionMethodName].[argumentName].objectValidators            array        List of ObjectValidators
+settings.[controllerName].[actionMethodName].[argumentName].propertyValidators          array        List of PropertyValidators
+======================================================================================  ===========  ==================================================================================================  =========
 
 Schema
 ~~~~~~
@@ -44,6 +45,7 @@ Schema
         controllerName {
             actionMethodName {
                 argumentName {
+                    overwriteDefaultValidation = 0 # (default 0) if 1 the validation rules defined in the property, model or controller are NOT executed
                     objectValidators {
                         0 = VendorName\ExtensionName\Domain\Validator\CustomObject1Validator
                         1 = VendorName\ExtensionName\Domain\Validator\CustomObject2Validator(firstOption=optionValue) # with one option
@@ -86,6 +88,7 @@ Example
         VendorName\ExtensionName\Controller\FooController {
             createAction {
                 fooBar {
+                    overwriteDefaultValidation = 1 # (default 0) if 0 the validation rules defined in the property, model or controller are ALSO executed
                     objectValidators {
                         0 = VendorName\ExtensionName\Domain\Validator\FooValidator(firstOption=value1, secondOption=123456)
                         1 = VendorName\ExtensionName\Domain\Validator\BarValidator(firstOption=value1)

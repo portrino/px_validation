@@ -1,6 +1,7 @@
 config.tx_extbase {
     objects {
         TYPO3\CMS\Extbase\Validation\ValidatorResolver.className = Portrino\PxValidation\Validation\ValidatorResolver
+        TYPO3\CMS\Extbase\Validation\Validator\ConjunctionValidator.className = Portrino\PxValidation\Validation\Validator\ConjunctionValidator
     }
 }
 
@@ -9,6 +10,7 @@ config.tx_extbase {
 #    controllerName {
 #        actionMethodName {
 #            argumentName {
+#                overwriteDefaultValidation = 1 # (default 0) if 0 the validation rules defined in the property, model or controller are also executed
 #                objectValidators {
 #                    0 = VendorName\ExtensionName\Domain\Validator\CustomObject1Validator(firstOption=optionValue, secondOption=optionValue)
 #                    1 = VendorName\ExtensionName\Domain\Validator\CustomObject2Validator(firstOption=optionValue)
