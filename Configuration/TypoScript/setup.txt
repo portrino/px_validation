@@ -1,0 +1,65 @@
+config.tx_extbase {
+    objects {
+        TYPO3\CMS\Extbase\Validation\ValidatorResolver.className = Portrino\PxValidation\Validation\ValidatorResolver
+    }
+}
+
+# Schema
+#plugin.tx_pxvalidation.settings {
+#    controllerName {
+#        actionMethodName {
+#            argumentName {
+#                objectValidators {
+#                    0 = VendorName\ExtensionName\Domain\Validator\CustomObject1Validator(firstOption=optionValue, secondOption=optionValue)
+#                    1 = VendorName\ExtensionName\Domain\Validator\CustomObject2Validator(firstOption=optionValue)
+#                }
+#                propertyValidators {
+#                    propertyName1 {
+#                        0 = ExtbaseValidator
+#                    }
+#                    propertyName2 {
+#                        0 = ExtbaseValidator
+#                        1 = ExtbaseValidator(firstOption=optionValue)
+#                        1 = VendorName\ExtensionName\Domain\Validator\CustomPropertyValidator(firstOption=optionValue)
+#                    }
+#                }
+#            }
+#        }
+#        actionMethodName2 {
+#            # ...
+#        }
+#    }
+#    controllerName2 {
+#        # ...
+#    }
+#}
+
+# Example
+#plugin.tx_pxvalidation.settings {
+#    VendorName\ExtensionName\Controller\FooController {
+#        actionMethodName {
+#            fooBar {
+#                objectValidators {
+#                    0 = VendorName\ExtensionName\Domain\Validator\FooValidator(firstOption=value1, secondOption=123456)
+#                    1 = VendorName\ExtensionName\Domain\Validator\BarValidator(firstOption=value1)
+#                }
+#                propertyValidators {
+#                    propertyName {
+#                        0 = NotEmpty
+#                    }
+#                    bar {
+#                        0 = NotEmpty
+#                        1 = StringLength(minimum=3)
+#                        2 = VendorName\ExtensionName\Domain\Validator\CustomValidator(firstOption=value1)
+#                    }
+#                }
+#            }
+#        }
+#        createAction {
+#            # ...
+#        }
+#    }
+#    VendorName\ExtensionName\Controller\BarController {
+#        # ...
+#    }
+#}

@@ -1,0 +1,25 @@
+{
+    "name": "portrino/px_validation",
+    "description": "Extbase validation via TypoScript",
+    "type": "typo3-cms-extension",
+    "homepage": "http://www.portrino.de",
+    "authors": [
+    {
+        "name": "André Wuttig",
+        "email": "wuttig@portrino.de",
+        "homepage": "http://www.portrino.de",
+        "role": "Developer"
+    }
+    ],
+    "support": {
+        "issues": "https://forge.typo3.org/projects/extension-px-validation/issues",
+        "source": "https://github.com/portrino/px_validation"
+    },
+    "license": "GPL-2.0+",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "Portrino\\PxValidation\\": "Classes"
+        }
+    }
+}
