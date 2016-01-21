@@ -14,12 +14,9 @@ For Administrators
 Import
 ------
 
-There are two ways of installing the extension. As described `here <https://wiki.typo3.org/Composer#Composer_Mode>`_
+There are two ways of installing the extension. Click here for more details: `<https://wiki.typo3.org/Composer#Composer_Mode>`_
 
-Import the extension to your server from the
-
-- TYPO3 Extension Repository (TER) or
-- via GIT
+Import the extension to your server from the `TER <http://typo3.org/extensions/repository/view/px_validation>`_ or clone it from `GitHub <https://github.com/portrino/px_validation/>`_.
 
 From TER (Classic Mode)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -27,8 +24,8 @@ From TER (Classic Mode)
 Select "*Get Extensions*" in the extension manager and update your extension list. Search for "px_validation" and click "Import and Install" to get the latest version.
 There are no other dependencies than TYPO3 6.2.
 
-From GIT
-^^^^^^^^
+From GitHub
+^^^^^^^^^^^
 
 Please use the following command to get the extension from GIT.
 
@@ -39,8 +36,8 @@ Please use the following command to get the extension from GIT.
 Via Composer (Composer Mode)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Since TYPO3 7.x you are able to get extension via composer. As described `here <https://wiki.typo3.org/Composer#Composer_Mode>`_ here you just have to user TYPO3 in Composer Mode
-and add this line to your require section within the composer.json file and run composer install / composer update.
+Since TYPO3 7.x you are able to get extension via composer. As described on `<https://wiki.typo3.org/Composer#Composer_Mode>`_ you just have to use TYPO3 in Composer Mode
+and add this line to your require section within the composer.json file and run ``composer install`` and ``composer update``.
 
 .. code-block:: json
 

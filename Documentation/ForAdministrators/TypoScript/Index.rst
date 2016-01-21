@@ -12,8 +12,8 @@
 TypoScript Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Include HybridAuth in Template
-''''''''''''''''''''''''''''''
+Include PxValidation in yout TypoScript Template
+''''''''''''''''''''''''''''''''''''''''''''''''
 
 Please include the static template of *PxValidation* either through an include or through the general options.
 
