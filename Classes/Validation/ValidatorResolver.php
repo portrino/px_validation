@@ -4,7 +4,7 @@ namespace Portrino\PxValidation\Validation;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2015 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
+ *  (c) 2016 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
  *
  *  All rights reserved
  *
@@ -64,14 +64,14 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
     }
 
     /**
-	 * We need to override this method to get the validate annotations also from TypoScript Configuration
-	 *
-	 * @param string $className
-	 * @param string $methodName
-	 *
-	 * @return array
-	 */
-	public function getMethodValidateAnnotations($className, $methodName) {
+     * We need to override this method to get the validate annotations also from TypoScript Configuration
+     *
+     * @param string $className
+     * @param string $methodName
+     *
+     * @return array
+     */
+    public function getMethodValidateAnnotations($className, $methodName) {
         $validateAnnotations = parent::getMethodValidateAnnotations($className, $methodName);
         $methodParameters = $this->reflectionService->getMethodParameters($className,$methodName);
         foreach ($methodParameters as $argumentName => $methodParameterValue) {
@@ -79,7 +79,7 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
                 $overwriteDefaultValidation = isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation']) ? (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'] : FALSE;
                 array_push($validateAnnotations, array(
                     'argumentName' => $argumentName,
-                    'validatorName' => 'Portrino\\PxValidation\\Domain\\Validator\\TypoScriptValidator',
+                    'validatorName' => \Portrino\PxValidation\Domain\Validator\TypoScriptValidator::class,
                     'validatorOptions' => array(
                         'className' => $className,
                         'methodName' => $methodName,
@@ -90,6 +90,6 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
             }
         }
         
-		return $validateAnnotations;
-	}
+        return $validateAnnotations;
+    }
 }

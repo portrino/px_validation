@@ -3,7 +3,7 @@ namespace Portrino\PxValidation\Domain\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2015 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
+ *  (c) 2016 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
  *
  *  All rights reserved
  *
@@ -92,7 +92,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         $this->validationFields = $this->getValidationFields();
         $objectValidators = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
         /** @var \TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator $objectValidator */
-        $objectValidator = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Validation\\Validator\\GenericObjectValidator', array());
+        $objectValidator = $this->objectManager->get(\TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator::class, array());
         $objectValidators->attach($objectValidator);
 
             // add the configured object validators
