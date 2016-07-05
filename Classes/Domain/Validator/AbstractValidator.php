@@ -92,8 +92,6 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         $result = TRUE;
         $this->validationFields = $this->getValidationFields();
 
-        \TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump($this->validationFields);
-
         $objectValidators = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
         /** @var GenericObjectValidator $objectValidator */
         $objectValidator = $this->objectManager->get(GenericObjectValidator::class, array());
