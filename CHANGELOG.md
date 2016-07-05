@@ -1,5 +1,9 @@
 # PxValidation Change log
 
+1.1.0 - 2016-07-05
+------------------
+* adds feature to configure validation of subProperties
+
 1.0.1 - 2016-03-22
 ------------------
 * extends `composer.json` with some information

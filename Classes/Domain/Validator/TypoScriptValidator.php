@@ -64,6 +64,7 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
         if (isset($this->settings[$className][$methodName][$argumentName])) {
             $result = $this->settings[$className][$methodName][$argumentName];
         }
+
         return $result;
     }
 
@@ -71,6 +72,6 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
      * @return boolean
      */
     public function overwriteDefaultValidation() {
-        return $this->options['overwriteDefaultValidation'];
+        return (boolean)$this->options['overwriteDefaultValidation'];
     }
 }

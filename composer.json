@@ -1,7 +1,7 @@
 {
     "name": "portrino/px_validation",
     "description": "Extbase validation via TypoScript",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "type": "typo3-cms-extension",
     "keywords": [
         "TYPO3",

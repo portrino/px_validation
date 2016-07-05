@@ -23,6 +23,7 @@ namespace Portrino\PxValidation\Domain\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
 
 /**
  * Class AbstractValidator
@@ -90,9 +91,12 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
 
         $result = TRUE;
         $this->validationFields = $this->getValidationFields();
+
+        \TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump($this->validationFields);
+
         $objectValidators = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
-        /** @var \TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator $objectValidator */
-        $objectValidator = $this->objectManager->get(\TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator::class, array());
+        /** @var GenericObjectValidator $objectValidator */
+        $objectValidator = $this->objectManager->get(GenericObjectValidator::class, array());
         $objectValidators->attach($objectValidator);
 
             // add the configured object validators
@@ -108,9 +112,28 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                 }
             }
         }
+
             // add the configured property validators
         if (array_key_exists('propertyValidators', $this->validationFields) && is_array($this->validationFields['propertyValidators'])) {
             foreach ($this->validationFields['propertyValidators'] as $validationField => $validationRules) {
+
+                /**
+                 *  if the property to validate is a child property then create a new $typoScriptChildValidator
+                 *  with the validation config of the child
+                 */
+                if (array_key_exists('propertyValidators', $validationRules)) {
+                    /** @var TypoScriptChildValidator $typoScriptChildValidator */
+                    $typoScriptChildValidator = $this->objectManager->get(TypoScriptChildValidator::class);
+
+
+                    $typoScriptChildValidator->setValidationFields($validationRules);
+                    $typoScriptChildValidator->setChildPropertyName($validationField);
+                    $child = call_user_func_array(array($object, 'get' . $validationField), array());
+                    $typoScriptChildValidator->setChildObject($child);
+                    $objectValidators->attach($typoScriptChildValidator);
+                    continue;
+                }
+
                     // only check if it is not a objectValidator (just check propertyValidators)
                 if (!property_exists($object, $validationField) && ($validationField != 'objectValidators')) {
                     throw new \Exception('The property: "' . $validationField . '" does not exist for class: "' . get_class($object) . '"');
@@ -129,7 +152,14 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         }
 
         foreach ($objectValidators as $objectValidator) {
-            $this->result->merge($objectValidator->validate($object));
+            if ($objectValidator instanceof TypoScriptChildValidator) {
+                $typoScriptChildValidator = $objectValidator;
+                $result = $typoScriptChildValidator->validate($typoScriptChildValidator->getChildObject());
+                $this->result->forProperty($typoScriptChildValidator->getChildPropertyName())->merge($result);
+            } else {
+                $this->result->merge($objectValidator->validate($object));
+            }
+
             if($this->result->hasErrors()) {
                 $result = FALSE;
             }
