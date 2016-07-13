@@ -63,6 +63,16 @@ Schema
                         propertyName3 {
                             0 = ExtbaseValidator1, ExtbaseValidator2 # comma separated list
                         }
+                        childObject {
+                            propertyValidators {
+                                subPropertyName1 {
+                                    0 = ExtbaseValidator
+                                }
+                                subPropertyName2 {
+                                    0 = ExtbaseValidator
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -101,6 +111,16 @@ Example
                             0 = NotEmpty
                             1 = StringLength(minimum=3)
                             2 = VendorName\ExtensionName\Domain\Validator\CustomValidator(firstOption=value1)
+                        }
+                        childObject {
+                            propertyValidators {
+                                baz {
+                                    0 = NotEmpty
+                                }
+                                qux {
+                                    0 = NotEmpty
+                                }
+                            }
                         }
                     }
                 }
