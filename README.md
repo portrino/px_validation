@@ -1,4 +1,4 @@
-# px_validation 1.1.0
+# px_validation 1.1.1
 Extbase Validation via Typoscript
 
 The **PxValidation** extension enables the possibility to define different validation configuration in

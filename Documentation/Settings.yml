@@ -7,7 +7,7 @@ conf.py:
   copyright: 2016
   project: PxValidation
   version: 1.1
-  release: 1.1.0
+  release: 1.1.1
   latex_elements:
     papersize: a4paper
     pointsize: 10pt

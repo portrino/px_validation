@@ -1,5 +1,9 @@
 # PxValidation Change log
 
+1.1.1 - 2016-07-13
+------------------
+* adds sphinx documentation for new sub-property validation
+
 1.1.0 - 2016-07-05
 ------------------
 * adds feature to configure validation of subProperties

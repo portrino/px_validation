@@ -30,7 +30,7 @@ PxValidation
 		validation, typoscript, extbase, portrino
 
 	:Copyright:
-		2015
+		2016
 
 	:Author:
 		André Wuttig
