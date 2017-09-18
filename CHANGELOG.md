@@ -1,5 +1,9 @@
 # PxValidation Change log
 
+1.1.2 - 2016-07-13
+------------------
+* [TASK] Reformat code for PSR2 
+
 1.1.1 - 2016-07-13
 ------------------
 * adds sphinx documentation for new sub-property validation

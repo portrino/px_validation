@@ -1,5 +1,7 @@
 <?php
+
 namespace Portrino\PxValidation\Domain\Validator;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -28,7 +30,8 @@ namespace Portrino\PxValidation\Domain\Validator;
  * Class TypoScriptChildValidator
  * @package Portrino\PxValidation\Domain\Validator
  */
-class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\TypoScriptValidator {
+class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\TypoScriptValidator
+{
 
     /**
      * the child property name which will be validated
@@ -48,7 +51,8 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @param array $validationFields
      */
-    public function setValidationFields($validationFields){
+    public function setValidationFields($validationFields)
+    {
         $this->validationFields = $validationFields;
     }
 
@@ -57,36 +61,40 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
      *
      * @return array
      */
-    protected function getValidationFields() {
+    protected function getValidationFields()
+    {
         return $this->validationFields;
     }
 
     /**
      * @return mixed
      */
-    public function getChildPropertyName() {
+    public function getChildPropertyName()
+    {
         return $this->childPropertyName;
     }
 
     /**
      * @param mixed $childPropertyName
      */
-    public function setChildPropertyName($childPropertyName) {
+    public function setChildPropertyName($childPropertyName)
+    {
         $this->childPropertyName = $childPropertyName;
     }
 
     /**
      * @return mixed
      */
-    public function getChildObject() {
+    public function getChildObject()
+    {
         return $this->childObject;
     }
 
     /**
      * @param mixed $childObject
      */
-    public function setChildObject($childObject) {
+    public function setChildObject($childObject)
+    {
         $this->childObject = $childObject;
     }
-
 }

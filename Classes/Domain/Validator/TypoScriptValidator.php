@@ -1,5 +1,7 @@
 <?php
+
 namespace Portrino\PxValidation\Domain\Validator;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -24,39 +26,51 @@ namespace Portrino\PxValidation\Domain\Validator;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
+
 /**
  * Class TypoScriptValidator
  *
  * @package Portrino\PxValidation\Domain\Validator
  */
-class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\AbstractValidator {
+class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\AbstractValidator
+{
 
     /**
-     * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManager $configurationManager
+     * @param ConfigurationManager $configurationManager
      * @return void
      */
-    public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManager $configurationManager) {
+    public function injectConfigurationManager(ConfigurationManager $configurationManager)
+    {
         $this->configurationManager = $configurationManager;
-        $this->settings = $this->configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'PxValidation');
+        $this->settings = $this->configurationManager->getConfiguration(
+            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS,
+            'PxValidation'
+        );
     }
 
     /**
      * @var array
      */
-    protected $supportedOptions = array(
-        'className' => array('', 'Name of the controller class which should be validate', 'string'),
-        'methodName' => array('', 'Name of the action method which should be validate', 'string'),
-        'argumentName' => array('', 'Name of the argument which should be validate', 'string'),
-        'overwriteDefaultValidation' => array('', 'If TRUE the validation rules defined in the property, model or controller are overwritten (will not be executed).', 'boolean')
-    );
+    protected $supportedOptions = [
+        'className' => ['', 'Name of the controller class which should be validate', 'string'],
+        'methodName' => ['', 'Name of the action method which should be validate', 'string'],
+        'argumentName' => ['', 'Name of the argument which should be validate', 'string'],
+        'overwriteDefaultValidation' => [
+            '',
+            'If TRUE the validation rules defined in the property, model or controller are overwritten (will not be executed).',
+            'boolean'
+        ]
+    ];
 
     /**
      * returns the array of validation fields from typoscript
      *
      * @return array
      */
-    protected function getValidationFields() {
-        $result = array();
+    protected function getValidationFields()
+    {
+        $result = [];
         $className = $this->options['className'];
         $methodName = $this->options['methodName'];
         $argumentName = $this->options['argumentName'];
@@ -71,7 +85,8 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
     /**
      * @return boolean
      */
-    public function overwriteDefaultValidation() {
+    public function overwriteDefaultValidation()
+    {
         return (boolean)$this->options['overwriteDefaultValidation'];
     }
 }

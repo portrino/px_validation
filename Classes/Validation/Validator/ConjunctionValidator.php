@@ -31,14 +31,16 @@ use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
  *
  * @api
  */
-class ConjunctionValidator extends \TYPO3\CMS\Extbase\Validation\Validator\ConjunctionValidator {
+class ConjunctionValidator extends \TYPO3\CMS\Extbase\Validation\Validator\ConjunctionValidator
+{
 
     /**
      * Only returns the TypoScriptValidator if overwriteDefaultValidation was TRUE other it returns child validators
      *
      * @return \SplObjectStorage
      */
-    public function getValidators() {
+    public function getValidators()
+    {
         $result = parent::getValidators();
 
         foreach ($this->validators as $validator) {

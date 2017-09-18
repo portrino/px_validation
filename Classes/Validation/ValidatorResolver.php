@@ -1,4 +1,5 @@
 <?php
+
 namespace Portrino\PxValidation\Validation;
 
 /***************************************************************
@@ -25,12 +26,16 @@ namespace Portrino\PxValidation\Validation;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+
 /**
  * Class ValidatorResolver
  *
  * @package Portrino\PxValidation\Validation
  */
-class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver {
+class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
+{
 
     /**
      * Contains the settings of the current extension
@@ -40,17 +45,21 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
     protected $settings;
 
     /**
-     * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+     * @var ConfigurationManagerInterface
      */
     protected $configurationManager;
 
     /**
-     * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
+     * @param ConfigurationManagerInterface $configurationManager
      * @return void
      */
-    public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
+    public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager)
+    {
         $this->configurationManager = $configurationManager;
-        $this->settings = $this->configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,'PxValidation');
+        $this->settings = $this->configurationManager->getConfiguration(
+            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
+            'PxValidation'
+        );
     }
 
     /**
@@ -59,7 +68,8 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
      * @param string $validateValue
      * @return array
      */
-    public function parseValidatorAnnotation($validateValue) {
+    public function parseValidatorAnnotation($validateValue)
+    {
         return parent::parseValidatorAnnotation($validateValue);
     }
 
@@ -71,25 +81,31 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver 
      *
      * @return array
      */
-    public function getMethodValidateAnnotations($className, $methodName) {
+    public function getMethodValidateAnnotations($className, $methodName)
+    {
         $validateAnnotations = parent::getMethodValidateAnnotations($className, $methodName);
-        $methodParameters = $this->reflectionService->getMethodParameters($className,$methodName);
+        $methodParameters = $this->reflectionService->getMethodParameters($className, $methodName);
         foreach ($methodParameters as $argumentName => $methodParameterValue) {
             if (isset($this->settings[$className][$methodName][$argumentName])) {
-                $overwriteDefaultValidation = isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation']) ? (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'] : FALSE;
-                array_push($validateAnnotations, array(
+                if (isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
+                    $overwriteDefaultValidation = (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
+                } else {
+                    $overwriteDefaultValidation = false;
+                }
+
+                array_push($validateAnnotations, [
                     'argumentName' => $argumentName,
-                    'validatorName' => \Portrino\PxValidation\Domain\Validator\TypoScriptValidator::class,
-                    'validatorOptions' => array(
+                    'validatorName' => TypoScriptValidator::class,
+                    'validatorOptions' => [
                         'className' => $className,
                         'methodName' => $methodName,
                         'argumentName' => $argumentName,
                         'overwriteDefaultValidation' => $overwriteDefaultValidation
-                    )
-                ));
+                    ]
+                ]);
             }
         }
-        
+
         return $validateAnnotations;
     }
 }
