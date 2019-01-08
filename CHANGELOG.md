@@ -1,5 +1,9 @@
 # PxValidation Change log
 
+1.2.0 - 2019-01-08
+------------------
+* [TASK] updates dependencies for TYPO3 9.5
+
 1.1.2 - 2016-07-13
 ------------------
 * [TASK] Reformat code for PSR2 
