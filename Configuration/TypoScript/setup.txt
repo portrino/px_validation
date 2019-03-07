@@ -1,7 +1,6 @@
 config.tx_extbase {
     objects {
-        TYPO3\CMS\Extbase\Validation\ValidatorResolver.className = Portrino\PxValidation\Validation\ValidatorResolver
-        TYPO3\CMS\Extbase\Validation\Validator\ConjunctionValidator.className = Portrino\PxValidation\Validation\Validator\ConjunctionValidator
+        TYPO3\CMS\Extbase\Reflection\ReflectionService.className = Portrino\PxValidation\Reflection\ReflectionService
     }
 }
 

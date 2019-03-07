@@ -19,6 +19,12 @@
             "email": "wuttig@portrino.de",
             "homepage": "http://www.portrino.de",
             "role": "Developer"
+        },
+        {
+            "name": "Thomas Griessbach",
+            "email": "griessbach@portrino.de",
+            "homepage": "http://www.portrino.de",
+            "role": "Developer"
         }
     ],
     "support": {
