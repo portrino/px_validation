@@ -10,9 +10,7 @@
         "portrino"
     ],
     "homepage": "http://www.portrino.de",
-    "license": [
-        "GPL-2.0+"
-    ],
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Andre Wuttig",
@@ -22,8 +20,11 @@
         }
     ],
     "support": {
-        "issues": "https://forge.typo3.org/projects/extension-px-validation/issues",
+        "issues": "https://github.com/portrino/px_validation/issues",
         "source": "https://github.com/portrino/px_validation"
+    },
+    "require": {
+        "typo3/cms-core": ">=6.2.0,<=8.7.99"
     },
     "autoload": {
         "psr-4": {
@@ -31,6 +32,7 @@
         }
     },
     "replace": {
-        "px_validation": "*"
+        "portrino/px_validation": "*",
+        "typo3-ter/px_validation": "*"
     }
 }

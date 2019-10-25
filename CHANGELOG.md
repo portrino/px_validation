@@ -1,4 +1,9 @@
-# PxValidation Change log
+# PxValidation Changelog
+
+1.1.3 - 2019-10-25
+------------------
+* [TASK] adds requirements in composer.json regarding typo3/cms-core package and updates TYPO3 version 
+  contraint in ext_emconf
 
 1.1.2 - 2016-07-13
 ------------------
