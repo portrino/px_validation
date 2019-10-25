@@ -10,9 +10,7 @@
         "portrino"
     ],
     "homepage": "http://www.portrino.de",
-    "license": [
-        "GPL-2.0+"
-    ],
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Andre Wuttig",
@@ -42,6 +40,7 @@
         }
     },
     "replace": {
-        "px_validation": "*"
+        "portrino/px_validation": "*",
+        "typo3-ter/px_validation": "*"
     }
 }
