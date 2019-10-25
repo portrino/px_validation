@@ -1,4 +1,8 @@
-# PxValidation Change log
+# PxValidation Changelog
+
+1.2.1 - 2019-10-25
+------------------
+* [TASK] updates requirements in composer.json regarding TYPO3 9.5
 
 1.2.0 - 2019-01-08
 ------------------
