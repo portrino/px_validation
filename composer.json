@@ -9,7 +9,7 @@
         "typo3",
         "portrino"
     ],
-    "homepage": "http://www.portrino.de",
+    "homepage": "https://www.portrino.de",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
@@ -30,9 +30,8 @@
         "source": "https://github.com/portrino/px_validation"
     },
     "require": {
-        "php": ">=7.0.0",
-        "typo3/cms-core": "^9.0",
-        "typo3/cms-extbase": "^9.0"
+        "php": ">=7.2.0",
+        "typo3/cms-core": "^9.5 || ^10.4"
     },
     "autoload": {
         "psr-4": {
