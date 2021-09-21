@@ -27,6 +27,7 @@ namespace Portrino\PxValidation\Domain\Validator;
  ***************************************************************/
 
 use Exception;
+use TYPO3\CMS\Extbase\Annotation\Inject;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
@@ -42,14 +43,14 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
 
     /**
      * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
-     * @inject
+     * @Inject
      */
     protected $reflectionService = null;
 
     /**
      *
      * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
-     * @inject
+     * @Inject
      */
     protected $objectManager = null;
 
@@ -73,7 +74,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
     protected $configurationManager;
     /**
      * @var \Portrino\PxValidation\Validation\ValidatorResolver
-     * @inject
+     * @Inject
      */
     protected $validatorResolver;
 
@@ -152,7 +153,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                 }
 
                 // only check if it is not a objectValidator (just check propertyValidators)
-                if (!property_exists($object, $validationField) && ($validationField != 'objectValidators')) {
+                if (!property_exists($object, $validationField) && ($validationField !== 'objectValidators')) {
                     throw new Exception(
                         'The property: "' . $validationField . '" does not exist for class: "' . get_class($object) . '"'
                     );

@@ -62,7 +62,8 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
         try {
             $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
         } catch (\ReflectionException $e) {
-            throw new \TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException($e->getMessage() . '. Reflection failed.',
+            throw new \TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException(
+                $e->getMessage() . '. Reflection failed.',
                 1278450972, $e);
         }
 
@@ -80,7 +81,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
                 foreach ($arguments as $argumentName => $argumentValue) {
                     if (isset($this->settings[$className][$methodName][$argumentName])) {
                         if (isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
-                            $overwriteDefaultValidation = (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
+                            $overwriteDefaultValidation = (bool)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
                         } else {
                             $overwriteDefaultValidation = false;
                         }
