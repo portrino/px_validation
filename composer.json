@@ -5,26 +5,12 @@
     "keywords": [
         "TYPO3",
         "CMS",
-        "Validation",
-        "typo3",
-        "portrino"
+        "extbase",
+        "validation",
+        "typoscript"
     ],
     "homepage": "https://www.portrino.de",
     "license": "GPL-2.0-or-later",
-    "authors": [
-        {
-            "name": "Andre Wuttig",
-            "email": "wuttig@portrino.de",
-            "homepage": "http://www.portrino.de",
-            "role": "Developer"
-        },
-        {
-            "name": "Thomas Griessbach",
-            "email": "griessbach@portrino.de",
-            "homepage": "http://www.portrino.de",
-            "role": "Developer"
-        }
-    ],
     "support": {
         "issues": "https://github.com/portrino/px_validation/issues",
         "source": "https://github.com/portrino/px_validation"
@@ -33,13 +19,18 @@
         "php": ">=7.2.0",
         "typo3/cms-core": "^9.5 || ^10.4"
     },
+    "replace": {
+        "portrino/px_validation": "*",
+        "typo3-ter/px-validation": "*"
+    },
     "autoload": {
         "psr-4": {
             "Portrino\\PxValidation\\": "Classes"
         }
     },
-    "replace": {
-        "portrino/px_validation": "*",
-        "typo3-ter/px_validation": "*"
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "px_validation"
+        }
     }
 }

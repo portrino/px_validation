@@ -26,6 +26,8 @@ namespace Portrino\PxValidation\Validation;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\DocParser;
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
@@ -63,14 +65,18 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
     }
 
     /**
-     * Parses the validator options given in @validate annotations.
-     *
      * @param string $validateValue
+     * @param array $validatorOptions
      * @return array
      */
-    public function parseValidatorAnnotation($validateValue)
+    public function parseValidatorAnnotation($validateValue, $validatorOptions = [])
     {
-        return parent::parseValidatorAnnotation($validateValue);
+        $context = '';
+        if (array_key_exists('className', $validatorOptions) && array_key_exists('argumentName', $validatorOptions)) {
+            $context = 'property ' . $validatorOptions['className'] . '::$' . $validatorOptions['argumentName'];
+        }
+        $parser = new DocParser();
+        return $parser->parse($validateValue, $context);
     }
 
     /**
@@ -83,6 +89,7 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
      */
     public function getMethodValidateAnnotations($className, $methodName)
     {
+        var_dump('getMethodValidateAnnotations');exit;
         $validateAnnotations = parent::getMethodValidateAnnotations($className, $methodName);
         $methodParameters = $this->reflectionService->getMethodParameters($className, $methodName);
         foreach ($methodParameters as $argumentName => $methodParameterValue) {

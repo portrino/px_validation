@@ -17,6 +17,8 @@ namespace Portrino\PxValidation\Reflection;
 
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Reflection\ClassSchema\Method;
+use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 
 /**
  * Reflection service for acquiring reflection based information.
@@ -54,7 +56,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
      * Builds class schemata from classes annotated as entities or value objects
      *
      * @param string $className
-     * @throws \TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException
+     * @throws UnknownClassException
      * @return ClassSchema The class schema
      */
     protected function buildClassSchema($className): \TYPO3\CMS\Extbase\Reflection\ClassSchema
@@ -62,7 +64,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
         try {
             $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
         } catch (\ReflectionException $e) {
-            throw new \TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException(
+            throw new UnknownClassException(
                 $e->getMessage() . '. Reflection failed.',
                 1278450972, $e);
         }
@@ -71,7 +73,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
         if (isset($this->settings[$className])) {
 
             $methodParameters = [];
-            foreach ($classSchema->getMethods() as $methodName => $method) {
+            foreach ($classSchema->getRawMethods() as $methodName => $method) {
                 if ($method['public'] && $method['params']) {
                     $methodParameters[$methodName] = $method['params'];
                 }

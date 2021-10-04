@@ -1,9 +1,3 @@
-config.tx_extbase {
-    objects {
-        TYPO3\CMS\Extbase\Reflection\ReflectionService.className = Portrino\PxValidation\Reflection\ReflectionService
-    }
-}
-
 # Schema
 #plugin.tx_pxvalidation.settings {
 #    controllerName {

@@ -1,5 +1,14 @@
 # PxValidation Changelog
 
+#### 2021-10-04
+* [!!!][WIP] updates several classes to work with "new" ReflectionService and Doctrine annotation parser in TYPO3 >= v9
+
+#### 2021-09-21
+* [!!!][WIP] small cleanups
+
+#### 2021-05-10
+* [!!!][WIP] trying to make extension TYPO3 >= v9 compatible
+
 1.2.1 - 2019-10-25
 ------------------
 * [TASK] updates requirements in composer.json regarding TYPO3 9.5

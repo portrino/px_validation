@@ -28,6 +28,7 @@ namespace Portrino\PxValidation\Domain\Validator;
 
 use Exception;
 use TYPO3\CMS\Extbase\Annotation\Inject;
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
@@ -100,7 +101,6 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      */
     public function isValid($object)
     {
-
         $result = true;
         $this->validationFields = $this->getValidationFields();
 
@@ -113,11 +113,12 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         if (array_key_exists('objectValidators', $this->validationFields) &&
             is_array($this->validationFields['objectValidators'])) {
             foreach ($this->validationFields['objectValidators'] as $validationRule) {
-                $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation($validationRule);
-                foreach ($parsedAnnotation['validators'] as $validatorConfiguration) {
+                $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation($validationRule, $this->options);
+                /** @var Validate $validateAnnotation */
+                foreach ($parsedAnnotation as $validateAnnotation) {
                     $newValidator = $this->validatorResolver->createValidator(
-                        $validatorConfiguration['validatorName'],
-                        $validatorConfiguration['validatorOptions']
+                        $validateAnnotation->validator,
+                        $validateAnnotation->options
                     );
                     if ($newValidator === null) {
                         throw new NoSuchValidatorException(
@@ -159,15 +160,19 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                     );
                 }
                 foreach ($validationRules as $validationRule) {
-                    $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation($validationRule);
-                    foreach ($parsedAnnotation['validators'] as $validatorConfiguration) {
+                    $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation(
+                        $validationRule,
+                        $this->options
+                    );
+                    /** @var Validate $validateAnnotation */
+                    foreach ($parsedAnnotation as $validateAnnotation) {
                         $newValidator = $this->validatorResolver->createValidator(
-                            $validatorConfiguration['validatorName'],
-                            $validatorConfiguration['validatorOptions']
+                            $validateAnnotation->validator,
+                            $validateAnnotation->options
                         );
                         if ($newValidator === null) {
                             throw new NoSuchValidatorException(
-                                'Invalid typoscript validation rule in ' . $object . '::' . $validationField . ': Could not resolve class name for  validator "' . $validatorConfiguration['validatorName'] . '".',
+                                'Invalid typoscript validation rule in ' . $object . '::' . $validationField . ': Could not resolve class name for  validator "' . $validateAnnotation['validatorName'] . '".',
                                 1241098027
                             );
                         }
