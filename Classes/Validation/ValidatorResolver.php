@@ -26,9 +26,7 @@ namespace Portrino\PxValidation\Validation;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\DocParser;
-use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
 /**
@@ -68,51 +66,15 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
      * @param string $validateValue
      * @param array $validatorOptions
      * @return array
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
      */
-    public function parseValidatorAnnotation($validateValue, $validatorOptions = [])
+    public function parseValidatorAnnotation(string $validateValue, array $validatorOptions = []): array
     {
         $context = '';
         if (array_key_exists('className', $validatorOptions) && array_key_exists('argumentName', $validatorOptions)) {
             $context = 'property ' . $validatorOptions['className'] . '::$' . $validatorOptions['argumentName'];
         }
-        $parser = new DocParser();
-        return $parser->parse($validateValue, $context);
-    }
-
-    /**
-     * We need to override this method to get the validate annotations also from TypoScript Configuration
-     *
-     * @param string $className
-     * @param string $methodName
-     *
-     * @return array
-     */
-    public function getMethodValidateAnnotations($className, $methodName)
-    {
-        var_dump('getMethodValidateAnnotations');exit;
-        $validateAnnotations = parent::getMethodValidateAnnotations($className, $methodName);
-        $methodParameters = $this->reflectionService->getMethodParameters($className, $methodName);
-        foreach ($methodParameters as $argumentName => $methodParameterValue) {
-            if (isset($this->settings[$className][$methodName][$argumentName])) {
-                if (isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
-                    $overwriteDefaultValidation = (Boolean)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
-                } else {
-                    $overwriteDefaultValidation = false;
-                }
-
-                array_push($validateAnnotations, [
-                    'argumentName' => $argumentName,
-                    'validatorName' => TypoScriptValidator::class,
-                    'validatorOptions' => [
-                        'className' => $className,
-                        'methodName' => $methodName,
-                        'argumentName' => $argumentName,
-                        'overwriteDefaultValidation' => $overwriteDefaultValidation
-                    ]
-                ]);
-            }
-        }
-
-        return $validateAnnotations;
+        return (new DocParser())->parse($validateValue, $context);
     }
 }
