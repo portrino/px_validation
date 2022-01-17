@@ -17,7 +17,7 @@
     },
     "require": {
         "php": ">=7.2.0",
-        "typo3/cms-core": "^9.5 || ^10.4"
+        "typo3/cms-core": "^9.5 || ^10.4 || ^11.5"
     },
     "replace": {
         "portrino/px_validation": "*",
