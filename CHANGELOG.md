@@ -1,6 +1,18 @@
 # PxValidation Changelog
 
+2.0.0 - 2012-03-07
+------------------
+#### 2022-01-17
+* [TASK] adds TYPO3 v11 to allowed typo3/cms-core dependency
+
+#### 2021-12-16
+* [CLEANUP] remove obsolete code from ValidatorResolver
+
+#### 2021-10-08
+* [TASK] updates example configuration in setup.typoscript
+
 #### 2021-10-04
+* [TASK] renames setup.txt -> setup.typoscript
 * [!!!][WIP] updates several classes to work with "new" ReflectionService and Doctrine annotation parser in TYPO3 >= v9
 
 #### 2021-09-21
