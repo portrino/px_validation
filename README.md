@@ -2,7 +2,6 @@
 
 [![TYPO3 9](https://img.shields.io/badge/TYPO3-9-orange.svg)](https://get.typo3.org/version/9)
 [![TYPO3 10](https://img.shields.io/badge/TYPO3-10-orange.svg)](https://get.typo3.org/version/10)
-[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg)](https://get.typo3.org/version/11)
 [![Latest Stable Version](https://poser.pugx.org/portrino/px_validation/v/stable)](https://packagist.org/packages/portrino/px_validation)
 [![Monthly Downloads](https://poser.pugx.org/portrino/px_validation/d/monthly)](https://packagist.org/packages/portrino/px_validation)
 [![License](https://poser.pugx.org/portrino/px_validation/license)](https://packagist.org/packages/portrino/px_validation)
@@ -126,11 +125,8 @@ is very helpful to understand what kind of issue the **PR** is going to solve.
 Bugfixes: Please describe what kind of bug your fix solve and give us feedback how to reproduce the issue. We're going
 to accept only bugfixes if we can reproduce the issue.
 
-Features: Not every feature is relevant for the bulk of `news` users. In addition: We don't want to make ``news``
-even more complicated in usability for an edge case feature. It helps to have a discussion about a new feature before you open a pull request.
-
-[1]: https://docs.typo3.org/typo3cms/extensions/news/
+[1]: https://docs.typo3.org/typo3cms/extensions/px_validation/
 [2]: https://getcomposer.org/
-[3]: https://extensions.typo3.org/extension/news
+[3]: https://extensions.typo3.org/extension/px_validation
 [4]: https://github.com/portrino/px_validation/blob/master/CHANGELOG.md
 [5]: https://semver.org/
