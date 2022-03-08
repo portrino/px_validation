@@ -27,7 +27,6 @@ use Symfony\Component\PropertyInfo\Type;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Type\BitSet;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
-use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Extbase\Annotation\IgnoreValidation;
 use TYPO3\CMS\Extbase\Annotation\Inject;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
@@ -215,13 +214,13 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 'd' => $defaultPropertyValue, // defaultValue
                 'e' => null, // elementType
                 't' => null, // type
-                'v' => [] // validators
+                'v' => [], // validators
             ];
 
             $annotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
             /** @var array|Validate[] $validateAnnotations */
-            $validateAnnotations = array_filter($annotations, function ($annotation) {
+            $validateAnnotations = array_filter($annotations, static function ($annotation) {
                 return $annotation instanceof Validate;
             });
 
@@ -245,10 +244,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_TRANSIENT;
             }
 
-            $isInjectProperty = $propertyName !== 'settings'
+            $isInjectProperty = $propertyName !== 'settings' && $reflectionProperty->isPublic()
                 && ($annotationReader->getPropertyAnnotation($reflectionProperty, Inject::class) instanceof Inject);
 
             if ($isInjectProperty) {
+                trigger_error(
+                    sprintf('Property "%s" of class "%s" uses Extbase\' property injection which is deprecated.', $propertyName, $reflectionClass->getName()),
+                    E_USER_DEPRECATED
+                );
                 $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_INJECT;
                 $classHasInjectProperties = true;
             }
@@ -274,7 +277,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             if ($type->isCollection()) {
                 $this->properties[$propertyName]['t'] = ltrim($type->getClassName() ?? $type->getBuiltinType(), '\\');
 
-                if (($collectionValueType = $type->getCollectionValueType()) instanceof Type) {
+                if (($collectionValueType = ($type->getCollectionValueTypes()[0] ?? null)) instanceof Type) {
                     $this->properties[$propertyName]['e'] = ltrim($collectionValueType->getClassName() ?? $type->getBuiltinType(), '\\');
                 }
             } else {
@@ -311,14 +314,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             $this->methods[$methodName]['params']       = [];
             $this->methods[$methodName]['tags']         = [];
             $this->methods[$methodName]['annotations']  = [];
-            $this->methods[$methodName]['isAction']     = StringUtility::endsWith($methodName, 'Action');
+            $this->methods[$methodName]['isAction']     = str_ends_with($methodName, 'Action');
 
             $argumentValidators = [];
 
             $annotations = $annotationReader->getMethodAnnotations($reflectionMethod);
 
             /** @var array|Validate[] $validateAnnotations */
-            $validateAnnotations = array_filter($annotations, function ($annotation) {
+            $validateAnnotations = array_filter($annotations, static function ($annotation) {
                 return $annotation instanceof Validate;
             });
 
@@ -352,7 +355,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
                 $parameterName = $reflectionParameter->getName();
 
-                $ignoreValidationParameters = array_filter($annotations, function ($annotation) use ($parameterName) {
+                $ignoreValidationParameters = array_filter($annotations, static function ($annotation) use ($parameterName) {
                     return $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName;
                 });
 
@@ -402,6 +405,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                     }
                 }
 
+                $typeDetectedViaDocBlock = false;
                 if ($docComment !== '' && $this->methods[$methodName]['params'][$parameterName]['type'] === null) {
                     /*
                      * We create (redundant) instances here in this loop due to the fact that
@@ -412,16 +416,16 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                      * Also, if we analyze all method doc blocks, we will trigger numerous errors
                      * due to non PSR-5 compatible tags in the core and in user land code.
                      *
-                     * Fetching the data type via doc blocks will also be deprecated and removed
-                     * in the near future.
+                     * Fetching the data type via doc blocks is deprecated and will be removed in the near future.
                      */
                     $params = self::$docBlockFactory->create($docComment)
-                                                    ->getTagsByName('param');
+                        ->getTagsByName('param');
 
                     if (isset($params[$parameterPosition])) {
                         /** @var Param $param */
                         $param = $params[$parameterPosition];
                         $this->methods[$methodName]['params'][$parameterName]['type'] = ltrim((string)$param->getType(), '\\');
+                        $typeDetectedViaDocBlock = true;
                     }
                 }
 
@@ -429,6 +433,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 if ($reflectionType instanceof \ReflectionNamedType && !$reflectionType->isBuiltin()
                     && ($reflectionMethod->isConstructor() || $this->hasInjectMethodName($reflectionMethod))
                 ) {
+                    if ($typeDetectedViaDocBlock) {
+                        $parameterType = $this->methods[$methodName]['params'][$parameterName]['type'];
+                        $errorMessage = <<<MESSAGE
+The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock, which is deprecated and will be removed in TYPO3 12.0. Use a proper parameter type hint instead:
+[private|protected|public] function $methodName($parameterType \$$parameterName)
+MESSAGE;
+                        trigger_error($errorMessage, E_USER_DEPRECATED);
+                    }
                     $this->methods[$methodName]['params'][$parameterName]['dependency'] = $reflectionType->getName();
                 }
 
@@ -436,9 +448,18 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 if (isset($argumentValidators[$parameterName])) {
                     if ($this->methods[$methodName]['params'][$parameterName]['type'] === null) {
                         throw new InvalidTypeHintException(
-                            'Missing type information for parameter "$' . $parameterName . '" in ' . $this->className . '->' . $methodName . '(): Either use an @param annotation or use a type hint.',
+                            'Missing type information for parameter "$' . $parameterName . '" in ' . $this->className . '->' . $methodName . '(): Use a type hint.',
                             1515075192
                         );
+                    }
+                    if ($typeDetectedViaDocBlock) {
+                        $parameterType = $this->methods[$methodName]['params'][$parameterName]['type'];
+                        $errorMessage = <<<MESSAGE
+The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock, which is deprecated and will be removed in TYPO3 12.0. Use a proper parameter type hint instead:
+[private|protected|public] function $methodName($parameterType \$$parameterName)
+MESSAGE;
+
+                        trigger_error($errorMessage, E_USER_DEPRECATED);
                     }
 
                     $this->methods[$methodName]['params'][$parameterName]['validators'] = $argumentValidators[$parameterName];
@@ -651,7 +672,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
      */
     public function getInjectMethods(): array
     {
-        return array_filter($this->buildMethodObjects(), function ($method) {
+        return array_filter($this->buildMethodObjects(), static function ($method) {
             /** @var Method $method */
             return $method->isInjectMethod();
         });
@@ -673,14 +694,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
      */
     private function buildPropertyObjects(): array
     {
-        if (!isset(static::$propertyObjects[$this->className])) {
-            static::$propertyObjects[$this->className] = [];
+        if (!isset(self::$propertyObjects[$this->className])) {
+            self::$propertyObjects[$this->className] = [];
             foreach ($this->properties as $propertyName => $propertyDefinition) {
-                static::$propertyObjects[$this->className][$propertyName] = new Property($propertyName, $propertyDefinition);
+                self::$propertyObjects[$this->className][$propertyName] = new Property($propertyName, $propertyDefinition);
             }
         }
 
-        return static::$propertyObjects[$this->className];
+        return self::$propertyObjects[$this->className];
     }
 
     /**
@@ -688,14 +709,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
      */
     private function buildMethodObjects(): array
     {
-        if (!isset(static::$methodObjects[$this->className])) {
-            static::$methodObjects[$this->className] = [];
+        if (!isset(self::$methodObjects[$this->className])) {
+            self::$methodObjects[$this->className] = [];
             foreach ($this->methods as $methodName => $methodDefinition) {
-                static::$methodObjects[$this->className][$methodName] = new Method($methodName, $methodDefinition, $this->className);
+                self::$methodObjects[$this->className][$methodName] = new Method($methodName, $methodDefinition, $this->className);
             }
         }
 
-        return static::$methodObjects[$this->className];
+        return self::$methodObjects[$this->className];
     }
 
     /*********************** custom *************************/

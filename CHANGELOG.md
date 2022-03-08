@@ -1,10 +1,14 @@
 # PxValidation Changelog
 
-2.0.0 - 2012-03-07
-------------------
+#### 2012-03-08
+* [TASK] updates ClassSchema XClass to be compatible with TYPO3 v11 core
+* [TASK] updates XClasses registration in ext_localconf 
+
 #### 2022-01-17
 * [TASK] adds TYPO3 v11 to allowed typo3/cms-core dependency
-
+ 
+2.0.0 - 2012-03-07
+------------------
 #### 2021-12-16
 * [CLEANUP] remove obsolete code from ValidatorResolver
 
