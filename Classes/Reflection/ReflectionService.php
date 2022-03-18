@@ -64,9 +64,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
         try {
             $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
         } catch (\ReflectionException $e) {
-            throw new UnknownClassException(
-                $e->getMessage() . '. Reflection failed.',
-                1278450972, $e);
+            throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1278450972, $e);
         }
 
         // add TS validators for all methods of this class
