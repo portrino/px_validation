@@ -18,7 +18,6 @@ namespace Portrino\PxValidation\Reflection;
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Reflection\ClassSchema\Method;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 
 /**
