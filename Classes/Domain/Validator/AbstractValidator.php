@@ -27,9 +27,11 @@ namespace Portrino\PxValidation\Domain\Validator;
  ***************************************************************/
 
 use Exception;
-use TYPO3\CMS\Extbase\Annotation\Inject;
+use Portrino\PxValidation\Validation\ValidatorResolver;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
 use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
@@ -41,19 +43,6 @@ use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
  */
 abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator
 {
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
-     * @Inject
-     */
-    protected $reflectionService = null;
-
-    /**
-     *
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
-     * @Inject
-     */
-    protected $objectManager = null;
 
     /**
      * Contains the settings of the current extension
@@ -73,22 +62,22 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      * @var ConfigurationManager
      */
     protected $configurationManager;
+
     /**
-     * @var \Portrino\PxValidation\Validation\ValidatorResolver
-     * @Inject
+     * @var ValidatorResolver
      */
     protected $validatorResolver;
 
-    /**
-     * @param ConfigurationManager $configurationManager
-     * @return void
-     */
-    public function injectConfigurationManager(ConfigurationManager $configurationManager)
+    public function __construct(array $options = [])
     {
-        $this->configurationManager = $configurationManager;
+        parent::__construct($options);
+
+        $this->configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
         $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS
+            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS,
+            'PxValidation'
         );
+        $this->validatorResolver = GeneralUtility::makeInstance(ValidatorResolver::class);
     }
 
     /**
@@ -106,7 +95,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
 
         $objectValidators = new ObjectStorage();
         /** @var GenericObjectValidator $objectValidator */
-        $objectValidator = $this->objectManager->get(GenericObjectValidator::class);
+        $objectValidator = GeneralUtility::makeInstance(GenericObjectValidator::class);
         $objectValidators->attach($objectValidator);
 
         // add the configured object validators
@@ -142,8 +131,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                  */
                 if (array_key_exists('propertyValidators', $validationRules)) {
                     /** @var TypoScriptChildValidator $typoScriptChildValidator */
-                    $typoScriptChildValidator = $this->objectManager->get(TypoScriptChildValidator::class);
-
+                    $typoScriptChildValidator = GeneralUtility::makeInstance(TypoScriptChildValidator::class);
 
                     $typoScriptChildValidator->setValidationFields($validationRules);
                     $typoScriptChildValidator->setChildPropertyName($validationField);

@@ -16,6 +16,7 @@ namespace Portrino\PxValidation\Reflection;
  */
 
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Method;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
@@ -26,31 +27,6 @@ use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
  */
 class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
 {
-
-    /**
-     * @var ConfigurationManagerInterface
-     */
-    protected $configurationManager;
-
-    /**
-     * Contains the settings of the current extension
-     *
-     * @var array
-     */
-    protected $settings;
-
-    /**
-     * @param ConfigurationManagerInterface $configurationManager
-     * @return void
-     */
-    public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager)
-    {
-        $this->configurationManager = $configurationManager;
-        $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
-            'PxValidation'
-        );
-    }
 
     /**
      * Builds class schemata from classes annotated as entities or value objects
@@ -67,9 +43,14 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
             throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1278450972, $e);
         }
 
-        // add TS validators for all methods of this class
-        if (isset($this->settings[$className])) {
+        $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
+        $settings = $configurationManager->getConfiguration(
+            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
+            'PxValidation'
+        );
 
+        // add TS validators for all methods of this class
+        if (isset($settings[$className])) {
             $methodParameters = [];
             foreach ($classSchema->getRawMethods() as $methodName => $method) {
                 if ($method['public'] && $method['params']) {
@@ -79,9 +60,9 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
 
             foreach ($methodParameters as $methodName => $arguments) {
                 foreach ($arguments as $argumentName => $argumentValue) {
-                    if (isset($this->settings[$className][$methodName][$argumentName])) {
-                        if (isset($this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
-                            $overwriteDefaultValidation = (bool)$this->settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
+                    if (isset($settings[$className][$methodName][$argumentName])) {
+                        if (isset($settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
+                            $overwriteDefaultValidation = (bool)$settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
                         } else {
                             $overwriteDefaultValidation = false;
                         }

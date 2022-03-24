@@ -26,8 +26,6 @@ namespace Portrino\PxValidation\Domain\Validator;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
-
 /**
  * Class TypoScriptValidator
  *
@@ -35,19 +33,6 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
  */
 class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\AbstractValidator
 {
-
-    /**
-     * @param ConfigurationManager $configurationManager
-     * @return void
-     */
-    public function injectConfigurationManager(ConfigurationManager $configurationManager)
-    {
-        $this->configurationManager = $configurationManager;
-        $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS,
-            'PxValidation'
-        );
-    }
 
     /**
      * @var array
