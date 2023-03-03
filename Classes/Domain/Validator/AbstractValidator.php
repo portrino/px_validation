@@ -49,17 +49,17 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @var array
      */
-    protected $settings;
+    protected $settings = [];
 
     /**
      * Contains the settings of the current extension
      *
      * @var array
      */
-    protected $validationFields;
+    protected $validationFields = [];
 
     /**
-     * @var ConfigurationManager
+     * @var ConfigurationManagerInterface
      */
     protected $configurationManager;
 
@@ -68,13 +68,11 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      */
     protected $validatorResolver;
 
-    public function __construct(array $options = [])
+    public function __construct()
     {
-        parent::__construct($options);
-
         $this->configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
         $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS,
+            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
             'PxValidation'
         );
         $this->validatorResolver = GeneralUtility::makeInstance(ValidatorResolver::class);
@@ -88,9 +86,8 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @return bool
      */
-    public function isValid($object)
+    protected function isValid(mixed $object): void
     {
-        $result = true;
         $this->validationFields = $this->getValidationFields();
 
         $objectValidators = new ObjectStorage();
@@ -178,12 +175,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
             } else {
                 $this->result->merge($objectValidator->validate($object));
             }
-
-            if ($this->result->hasErrors()) {
-                $result = false;
-            }
         }
-        return $result;
     }
 
     /**
@@ -191,5 +183,5 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @return array
      */
-    abstract protected function getValidationFields();
+    abstract protected function getValidationFields(): array;
 }

@@ -53,7 +53,7 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
      *
      * @return array
      */
-    protected function getValidationFields()
+    protected function getValidationFields(): array
     {
         $result = [];
         $className = $this->options['className'];
@@ -68,10 +68,10 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
-    public function overwriteDefaultValidation()
+    public function overwriteDefaultValidation(): bool
     {
-        return (boolean)$this->options['overwriteDefaultValidation'];
+        return (bool)$this->options['overwriteDefaultValidation'];
     }
 }

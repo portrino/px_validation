@@ -28,7 +28,6 @@ use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Type\BitSet;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Extbase\Annotation\IgnoreValidation;
-use TYPO3\CMS\Extbase\Annotation\Inject;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
@@ -213,9 +212,31 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 'c' => null, // cascade
                 'd' => $defaultPropertyValue, // defaultValue
                 'e' => null, // elementType
+                'n' => false, // nullable
                 't' => null, // type
                 'v' => [], // validators
             ];
+
+            $validateAttributes = [];
+            foreach ($reflectionProperty->getAttributes() as $attribute) {
+                match ($attribute->getName()) {
+                    Validate::class => $validateAttributes[] = $attribute,
+                    Lazy::class => $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_LAZY,
+                    Transient::class => $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_TRANSIENT,
+                    Cascade::class => $this->properties[$propertyName]['c'] = ($attribute->newInstance())->value,
+                    default => '' // non-extbase attributes
+                };
+            }
+            foreach ($validateAttributes as $attribute) {
+                $validator = $attribute->newInstance();
+                $validatorObjectName = ValidatorClassNameResolver::resolve($validator->validator);
+
+                $this->properties[$propertyName]['v'][] = [
+                    'name' => $validator->validator,
+                    'options' => $validator->options,
+                    'className' => $validatorObjectName,
+                ];
+            }
 
             $annotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
@@ -244,18 +265,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_TRANSIENT;
             }
 
-            $isInjectProperty = $propertyName !== 'settings' && $reflectionProperty->isPublic()
-                && ($annotationReader->getPropertyAnnotation($reflectionProperty, Inject::class) instanceof Inject);
-
-            if ($isInjectProperty) {
-                trigger_error(
-                    sprintf('Property "%s" of class "%s" uses Extbase\' property injection which is deprecated.', $propertyName, $reflectionClass->getName()),
-                    E_USER_DEPRECATED
-                );
-                $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_INJECT;
-                $classHasInjectProperties = true;
-            }
-
             $this->properties[$propertyName]['propertyCharacteristicsBit'] = $propertyCharacteristicsBit;
 
             /** @var Type[] $types */
@@ -273,6 +282,8 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             /** @var Type $type */
             $type = current($types);
+
+            $this->properties[$propertyName]['n'] = $type->isNullable();
 
             if ($type->isCollection()) {
                 $this->properties[$propertyName]['t'] = ltrim($type->getClassName() ?? $type->getBuiltinType(), '\\');
@@ -318,6 +329,16 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             $argumentValidators = [];
 
+            $validateAttributes = [];
+            $reflectionAttributes = $reflectionMethod->getAttributes();
+            foreach ($reflectionAttributes as $attribute) {
+                match ($attribute->getName()) {
+                    Validate::class => $validateAttributes[] = $attribute,
+                    IgnoreValidation::class => $this->methods[$methodName]['tags']['ignorevalidation'][] = $attribute->newInstance()->argumentName,
+                    default => '' // non-extbase attributes
+                };
+            }
+
             $annotations = $annotationReader->getMethodAnnotations($reflectionMethod);
 
             /** @var array|Validate[] $validateAnnotations */
@@ -327,7 +348,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             if ($this->methods[$methodName]['isAction']
                 && $this->bitSet->get(self::BIT_CLASS_IS_CONTROLLER)
-                && count($validateAnnotations) > 0
+                && (count($validateAnnotations) > 0 || $validateAttributes !== [])
             ) {
                 foreach ($validateAnnotations as $validateAnnotation) {
                     $validatorName = $validateAnnotation->validator;
@@ -336,6 +357,16 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                     $argumentValidators[$validateAnnotation->param][] = [
                         'name' => $validatorName,
                         'options' => $validateAnnotation->options,
+                        'className' => $validatorObjectName,
+                    ];
+                }
+                foreach ($validateAttributes as $attribute) {
+                    $validator = $attribute->newInstance();
+                    $validatorObjectName = ValidatorClassNameResolver::resolve($validator->validator);
+
+                    $argumentValidators[$validator->param][] = [
+                        'name' => $validator->validator,
+                        'options' => $validator->options,
                         'className' => $validatorObjectName,
                     ];
                 }
@@ -351,12 +382,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             $docComment = is_string($docComment) ? $docComment : '';
 
             foreach ($reflectionMethod->getParameters() as $parameterPosition => $reflectionParameter) {
-                /* @var \ReflectionParameter $reflectionParameter */
-
                 $parameterName = $reflectionParameter->getName();
 
                 $ignoreValidationParameters = array_filter($annotations, static function ($annotation) use ($parameterName) {
                     return $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName;
+                });
+
+                $ignoreValidationParametersFromAttribute = array_filter($reflectionAttributes, static function ($attribute) use ($parameterName) {
+                    return $attribute->getName() === IgnoreValidation::class && $attribute->newInstance()->argumentName === $parameterName;
                 });
 
                 $reflectionType = $reflectionParameter->getType();
@@ -372,7 +405,7 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 $this->methods[$methodName]['params'][$parameterName]['hasDefaultValue'] = $reflectionParameter->isDefaultValueAvailable();
                 $this->methods[$methodName]['params'][$parameterName]['defaultValue'] = null;
                 $this->methods[$methodName]['params'][$parameterName]['dependency'] = null; // Extbase DI
-                $this->methods[$methodName]['params'][$parameterName]['ignoreValidation'] = count($ignoreValidationParameters) === 1;
+                $this->methods[$methodName]['params'][$parameterName]['ignoreValidation'] = $ignoreValidationParameters !== [] || $ignoreValidationParametersFromAttribute !== [];
                 $this->methods[$methodName]['params'][$parameterName]['validators'] = [];
 
                 if ($reflectionParameter->isDefaultValueAvailable()) {
@@ -417,6 +450,8 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                      * due to non PSR-5 compatible tags in the core and in user land code.
                      *
                      * Fetching the data type via doc blocks is deprecated and will be removed in the near future.
+                     * Currently, this affects at least fooAction() ActionController methods, which does not
+                     * deprecate non-PHP-type-hinted methods.
                      */
                     $params = self::$docBlockFactory->create($docComment)
                         ->getTagsByName('param');
@@ -436,10 +471,10 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                     if ($typeDetectedViaDocBlock) {
                         $parameterType = $this->methods[$methodName]['params'][$parameterName]['type'];
                         $errorMessage = <<<MESSAGE
-The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock, which is deprecated and will be removed in TYPO3 12.0. Use a proper parameter type hint instead:
+The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock. Use a proper PHP parameter type hint instead:
 [private|protected|public] function $methodName($parameterType \$$parameterName)
 MESSAGE;
-                        trigger_error($errorMessage, E_USER_DEPRECATED);
+                        throw new \RuntimeException($errorMessage, 1639224353);
                     }
                     $this->methods[$methodName]['params'][$parameterName]['dependency'] = $reflectionType->getName();
                 }
@@ -455,11 +490,10 @@ MESSAGE;
                     if ($typeDetectedViaDocBlock) {
                         $parameterType = $this->methods[$methodName]['params'][$parameterName]['type'];
                         $errorMessage = <<<MESSAGE
-The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock, which is deprecated and will be removed in TYPO3 12.0. Use a proper parameter type hint instead:
+The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock. Use a proper PHP parameter type hint instead:
 [private|protected|public] function $methodName($parameterType \$$parameterName)
 MESSAGE;
-
-                        trigger_error($errorMessage, E_USER_DEPRECATED);
+                        throw new \RuntimeException($errorMessage, 1639224354);
                     }
 
                     $this->methods[$methodName]['params'][$parameterName]['validators'] = $argumentValidators[$parameterName];
@@ -508,10 +542,9 @@ MESSAGE;
     }
 
     /**
-     * @throws NoSuchPropertyException
-     *
      * @param string $propertyName
      * @return Property
+     * @throws NoSuchPropertyException
      */
     public function getProperty(string $propertyName): Property
     {
@@ -530,6 +563,20 @@ MESSAGE;
     public function getProperties(): array
     {
         return $this->buildPropertyObjects();
+    }
+
+    /**
+     * Returns all properties that do not start with an underscore like $_localizedUid
+     *
+     * @return Property[]
+     * @internal
+     */
+    public function getDomainObjectProperties(): array
+    {
+        return array_filter(
+            $this->getProperties(),
+            fn (Property $property) => !str_starts_with($property->getName(), '_')
+        );
     }
 
     /**
@@ -563,10 +610,9 @@ MESSAGE;
     }
 
     /**
-     * @throws NoSuchMethodException
-     *
      * @param string $methodName
      * @return Method
+     * @throws NoSuchMethodException
      */
     public function getMethod(string $methodName): Method
     {
@@ -599,7 +645,7 @@ MESSAGE;
         }
 
         if (
-            strpos($reflectionMethod->getName(), 'inject') === 0
+            str_starts_with($reflectionMethod->getName(), 'inject')
         ) {
             return true;
         }
@@ -675,17 +721,6 @@ MESSAGE;
         return array_filter($this->buildMethodObjects(), static function ($method) {
             /** @var Method $method */
             return $method->isInjectMethod();
-        });
-    }
-
-    /**
-     * @return array|Property[]
-     */
-    public function getInjectProperties(): array
-    {
-        return array_filter($this->buildPropertyObjects(), static function ($property) {
-            /** @var Property $property */
-            return $property->isInjectProperty();
         });
     }
 

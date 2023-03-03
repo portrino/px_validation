@@ -16,8 +16,8 @@
         "source": "https://github.com/portrino/px_validation"
     },
     "require": {
-        "php": "^7.4 || ^8.0",
-        "typo3/cms-core": "^11.5"
+        "php": "^8.0",
+        "typo3/cms-core": "^12.0"
     },
     "replace": {
         "typo3-ter/px-validation": "*"

@@ -1,6 +1,11 @@
 # PxValidation Changelog
 
-#### 2012-03-08
+#### 2023-03-03
+* [TASK] updates several classes and configuration files to be compatible with TYPO3 v12 core
+* [TASK] adds TYPO3 v12 to allowed typo3/cms-core dependency
+
+3.0.0 2022-03-08
+----------------
 * [TASK] updates ClassSchema XClass to be compatible with TYPO3 v11 core
 * [TASK] updates XClasses registration in ext_localconf 
 

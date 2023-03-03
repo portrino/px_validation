@@ -42,7 +42,7 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
      *
      * @var array
      */
-    protected $settings;
+    protected $settings = [];
 
     /**
      * @var ConfigurationManagerInterface
@@ -53,7 +53,7 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
      * @param ConfigurationManagerInterface $configurationManager
      * @return void
      */
-    public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager)
+    public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager): void
     {
         $this->configurationManager = $configurationManager;
         $this->settings = $this->configurationManager->getConfiguration(
