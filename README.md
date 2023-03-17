@@ -1,6 +1,6 @@
 # TYPO3 Extension `px_validation`
 
-[![TYPO3 11](https://img.shields.io/badge/TYPO3-10-orange.svg)](https://get.typo3.org/version/10)
+[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg)](https://get.typo3.org/version/10)
 [![Latest Stable Version](https://poser.pugx.org/portrino/px_validation/v/stable)](https://packagist.org/packages/portrino/px_validation)
 [![Monthly Downloads](https://poser.pugx.org/portrino/px_validation/d/monthly)](https://packagist.org/packages/portrino/px_validation)
 [![License](https://poser.pugx.org/portrino/px_validation/license)](https://packagist.org/packages/portrino/px_validation)
