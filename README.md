@@ -6,7 +6,7 @@
 [![Monthly Downloads](https://poser.pugx.org/portrino/px_validation/d/monthly)](https://packagist.org/packages/portrino/px_validation)
 [![License](https://poser.pugx.org/portrino/px_validation/license)](https://packagist.org/packages/portrino/px_validation)
 
-> Extbase Validation via Typoscript
+> Extbase validation controlled/ overruled via TypoScript for TYPO3 extensions
 
 ## 1 Features
 
@@ -112,18 +112,30 @@ Please look into the [CHANGELOG file in the extension][4].
 
 ### 3.2 Release Management
 
-News uses [**semantic versioning**][5], which means, that
+**PxValidation** uses [**semantic versioning**][5], which means, that
 * **bugfix updates** (e.g. 1.0.0 => 1.0.1) just includes small bugfixes or security relevant stuff without breaking changes,
 * **minor updates** (e.g. 1.0.0 => 1.1.0) includes new features and smaller tasks without breaking changes,
 * and **major updates** (e.g. 1.0.0 => 2.0.0) breaking changes wich can be refactorings, features or bugfixes.
 
+| PxValidation | TYPO3      | PHP       | Support / Development                |
+|--------------|------------|-----------|--------------------------------------|
+| 2.0.x        | 9.5 - 10.4 | 7.2 - 7.4 | bugfixes, security updates           |
+| 1.2.x        | 9.5        | 7.2 - 7.4 | none                                 |
+| 1.1.x        | 6.2 - 8.7  | 5.5 - 7.4 | none                                 |
+
 ### 3.3 Contribution
 
-**Pull Requests** are gladly welcome! Nevertheless please don't forget to add an issue and connect it to your pull requests. This
-is very helpful to understand what kind of issue the **PR** is going to solve.
+**Pull Requests** are gladly welcome! Nevertheless, please don't forget to add an issue and connect it to your pull 
+requests. This is very helpful to understand what kind of issue the **PR** is going to solve.
 
 Bugfixes: Please describe what kind of bug your fix solve and give us feedback how to reproduce the issue. We're going
 to accept only bugfixes if we can reproduce the issue.
+
+## 4 Authors
+
+* See the list of [contributors](https://github.com/portrino/px_dbsequencer/graphs/contributors) who participated in this project.
+
+---
 
 [1]: https://docs.typo3.org/typo3cms/extensions/px_validation/
 [2]: https://getcomposer.org/

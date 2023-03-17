@@ -1,7 +1,18 @@
 # PxValidation Changelog
 
-2.0.0 - 2012-03-07
+2.0.1 - 2023-03-17
 ------------------
+* [CLEANUP] updates README
+
+2.0.0 - 2022-03-08
+------------------
+#### 2022-03-08
+* [TASK] reverts TYPO3 v11 compatibility for current master
+
+#### 2022-03-07
+* [CLEANUP] updates replace section in composer.json
+* [TASK] updates CHANGELOG and README
+
 #### 2022-01-17
 * [TASK] adds TYPO3 v11 to allowed typo3/cms-core dependency
 
@@ -46,7 +57,6 @@
 ------------------
 * extends `composer.json` with some information
 * anonymous function to initialize the extension
-
 
 1.0.0 - 2016-01-19
 ------------------
