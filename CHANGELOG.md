@@ -2,7 +2,7 @@
 
 3.0.0 - 2023-03-17
 ------------------
-* [CLEANUP] updates README
+* [CLEANUP] updates CHANGELOG and README
 
 #### 2022-03-24
 * [CLEANUP] updates removes obsolete use statement in ReflectionService
