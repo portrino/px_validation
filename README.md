@@ -2,8 +2,10 @@
 
 [![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
 [![Latest Stable Version](https://poser.pugx.org/portrino/px_validation/v/stable)](https://packagist.org/packages/portrino/px_validation)
+[![Total Downloads](https://poser.pugx.org/portrino/px_validation/downloads)](https://packagist.org/packages/portrino/px_validation)
 [![Monthly Downloads](https://poser.pugx.org/portrino/px_validation/d/monthly)](https://packagist.org/packages/portrino/px_validation)
 [![License](https://poser.pugx.org/portrino/px_validation/license)](https://packagist.org/packages/portrino/px_validation)
+![CI](https://github.com/portrino/px_validation/actions/workflows/ci.yml/badge.svg)
 
 > Extbase validation controlled/ overruled via TypoScript for TYPO3 extensions
 
