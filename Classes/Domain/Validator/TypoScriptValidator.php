@@ -28,12 +28,9 @@ namespace Portrino\PxValidation\Domain\Validator;
 
 /**
  * Class TypoScriptValidator
- *
- * @package Portrino\PxValidation\Domain\Validator
  */
 class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\AbstractValidator
 {
-
     /**
      * @var array
      */
@@ -44,8 +41,8 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
         'overwriteDefaultValidation' => [
             '',
             'If TRUE the validation rules defined in the property, model or controller are overwritten (will not be executed).',
-            'boolean'
-        ]
+            'boolean',
+        ],
     ];
 
     /**

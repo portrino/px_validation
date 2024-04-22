@@ -31,12 +31,9 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
 /**
  * Class ValidatorResolver
- *
- * @package Portrino\PxValidation\Validation
  */
 class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
 {
-
     /**
      * Contains the settings of the current extension
      *
@@ -51,7 +48,6 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
 
     /**
      * @param ConfigurationManagerInterface $configurationManager
-     * @return void
      */
     public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager): void
     {

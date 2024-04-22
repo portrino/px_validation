@@ -28,7 +28,6 @@ use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationConfigurationExcepti
  */
 class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
 {
-
     /**
      * Builds class schemata from classes annotated as entities or value objects
      *
@@ -38,7 +37,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
      * @throws InvalidTypeHintException
      * @throws InvalidValidationConfigurationException
      */
-    protected function buildClassSchema($className): \TYPO3\CMS\Extbase\Reflection\ClassSchema
+    protected function buildClassSchema($className): ClassSchema
     {
         try {
             $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
@@ -78,7 +77,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
                                 'className' => $className,
                                 'methodName' => $methodName,
                                 'argumentName' => $argumentName,
-                                'overwriteDefaultValidation' => $overwriteDefaultValidation
+                                'overwriteDefaultValidation' => $overwriteDefaultValidation,
                             ]
                         );
                     }

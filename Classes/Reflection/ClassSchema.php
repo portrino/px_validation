@@ -184,7 +184,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
     }
 
     /**
-     * @param \ReflectionClass $reflectionClass
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException
      */
@@ -212,7 +211,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 'c' => null, // cascade
                 'd' => $defaultPropertyValue, // defaultValue
                 'e' => null, // elementType
-                'n' => false, // nullable
                 't' => null, // type
                 'v' => [], // validators
             ];
@@ -240,10 +238,11 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             $annotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
-            /** @var array|Validate[] $validateAnnotations */
-            $validateAnnotations = array_filter($annotations, static function ($annotation) {
-                return $annotation instanceof Validate;
-            });
+            /** @var array<int, Validate> $validateAnnotations */
+            $validateAnnotations = array_filter(
+                $annotations,
+                static fn (object $annotation): bool => $annotation instanceof Validate
+            );
 
             if (count($validateAnnotations) > 0) {
                 foreach ($validateAnnotations as $validateAnnotation) {
@@ -269,30 +268,14 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             /** @var Type[] $types */
             $types = (array)self::$propertyInfoExtractor->getTypes($this->className, $propertyName, ['reflectionProperty' => $reflectionProperty]);
-            $typesCount = count($types);
 
-            if ($typesCount !== 1) {
-                continue;
-            }
-
-            if (($annotation = $annotationReader->getPropertyAnnotation($reflectionProperty, Cascade::class)) instanceof Cascade) {
+            if ($types !== [] && ($annotation = $annotationReader->getPropertyAnnotation($reflectionProperty, Cascade::class)) instanceof Cascade) {
                 /** @var Cascade $annotation */
                 $this->properties[$propertyName]['c'] = $annotation->value;
             }
 
-            /** @var Type $type */
-            $type = current($types);
-
-            $this->properties[$propertyName]['n'] = $type->isNullable();
-
-            if ($type->isCollection()) {
-                $this->properties[$propertyName]['t'] = ltrim($type->getClassName() ?? $type->getBuiltinType(), '\\');
-
-                if (($collectionValueType = ($type->getCollectionValueTypes()[0] ?? null)) instanceof Type) {
-                    $this->properties[$propertyName]['e'] = ltrim($collectionValueType->getClassName() ?? $type->getBuiltinType(), '\\');
-                }
-            } else {
-                $this->properties[$propertyName]['t'] = $types[0]->getClassName() ?? $types[0]->getBuiltinType();
+            foreach ($types as $type) {
+                $this->properties[$propertyName]['t'][] = $type;
             }
         }
 
@@ -302,7 +285,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
     }
 
     /**
-     * @param \ReflectionClass $reflectionClass
      * @throws InvalidTypeHintException
      * @throws InvalidValidationConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
@@ -341,10 +323,11 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
             $annotations = $annotationReader->getMethodAnnotations($reflectionMethod);
 
-            /** @var array|Validate[] $validateAnnotations */
-            $validateAnnotations = array_filter($annotations, static function ($annotation) {
-                return $annotation instanceof Validate;
-            });
+            /** @var array<int<0, max>, Validate> $validateAnnotations */
+            $validateAnnotations = array_filter(
+                $annotations,
+                static fn (object $annotation): bool => $annotation instanceof Validate
+            );
 
             if ($this->methods[$methodName]['isAction']
                 && $this->bitSet->get(self::BIT_CLASS_IS_CONTROLLER)
@@ -384,13 +367,16 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             foreach ($reflectionMethod->getParameters() as $parameterPosition => $reflectionParameter) {
                 $parameterName = $reflectionParameter->getName();
 
-                $ignoreValidationParameters = array_filter($annotations, static function ($annotation) use ($parameterName) {
-                    return $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName;
-                });
+                $ignoreValidationParameters = array_filter(
+                    $annotations,
+                    static fn (object $annotation): bool => $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName
+                );
 
-                $ignoreValidationParametersFromAttribute = array_filter($reflectionAttributes, static function ($attribute) use ($parameterName) {
-                    return $attribute->getName() === IgnoreValidation::class && $attribute->newInstance()->argumentName === $parameterName;
-                });
+                $ignoreValidationParametersFromAttribute = array_filter(
+                    $reflectionAttributes,
+                    static fn (\ReflectionAttribute $attribute): bool
+                        => $attribute->getName() === IgnoreValidation::class && $attribute->newInstance()->argumentName === $parameterName
+                );
 
                 $reflectionType = $reflectionParameter->getType();
 
@@ -542,8 +528,6 @@ MESSAGE;
     }
 
     /**
-     * @param string $propertyName
-     * @return Property
      * @throws NoSuchPropertyException
      */
     public function getProperty(string $propertyName): Property
@@ -575,7 +559,7 @@ MESSAGE;
     {
         return array_filter(
             $this->getProperties(),
-            fn (Property $property) => !str_starts_with($property->getName(), '_')
+            static fn (Property $property): bool => !str_starts_with($property->getName(), '_')
         );
     }
 
@@ -594,24 +578,18 @@ MESSAGE;
      * If the class schema has a certain property.
      *
      * @param string $propertyName Name of the property
-     * @return bool
      */
     public function hasProperty(string $propertyName): bool
     {
         return array_key_exists($propertyName, $this->properties);
     }
 
-    /**
-     * @return bool
-     */
     public function hasConstructor(): bool
     {
         return $this->bitSet->get(self::BIT_CLASS_HAS_CONSTRUCTOR);
     }
 
     /**
-     * @param string $methodName
-     * @return Method
      * @throws NoSuchMethodException
      */
     public function getMethod(string $methodName): Method
@@ -633,10 +611,6 @@ MESSAGE;
         return $this->buildMethodObjects();
     }
 
-    /**
-     * @param \ReflectionMethod $reflectionMethod
-     * @return bool
-     */
     protected function hasInjectMethodName(\ReflectionMethod $reflectionMethod): bool
     {
         $methodName = $reflectionMethod->getName();
@@ -654,7 +628,6 @@ MESSAGE;
     }
 
     /**
-     * @return bool
      * @internal
      */
     public function isModel(): bool
@@ -663,7 +636,6 @@ MESSAGE;
     }
 
     /**
-     * @return bool
      * @internal
      */
     public function isEntity(): bool
@@ -672,7 +644,6 @@ MESSAGE;
     }
 
     /**
-     * @return bool
      * @internal
      */
     public function isValueObject(): bool
@@ -680,34 +651,21 @@ MESSAGE;
         return $this->bitSet->get(self::BIT_CLASS_IS_VALUE_OBJECT);
     }
 
-    /**
-     * @return bool
-     */
     public function isSingleton(): bool
     {
         return $this->bitSet->get(self::BIT_CLASS_IS_SINGLETON);
     }
 
-    /**
-     * @param string $methodName
-     * @return bool
-     */
     public function hasMethod(string $methodName): bool
     {
         return isset($this->methods[$methodName]);
     }
 
-    /**
-     * @return bool
-     */
     public function hasInjectProperties(): bool
     {
         return $this->bitSet->get(self::BIT_CLASS_HAS_INJECT_PROPERTIES);
     }
 
-    /**
-     * @return bool
-     */
     public function hasInjectMethods(): bool
     {
         return $this->bitSet->get(self::BIT_CLASS_HAS_INJECT_METHODS);
@@ -718,10 +676,7 @@ MESSAGE;
      */
     public function getInjectMethods(): array
     {
-        return array_filter($this->buildMethodObjects(), static function ($method) {
-            /** @var Method $method */
-            return $method->isInjectMethod();
-        });
+        return array_filter($this->buildMethodObjects(), static fn (Method $method): bool => $method->isInjectMethod());
     }
 
     /**

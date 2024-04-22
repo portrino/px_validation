@@ -28,18 +28,15 @@ namespace Portrino\PxValidation\Domain\Validator;
 
 /**
  * Class TypoScriptChildValidator
- * @package Portrino\PxValidation\Domain\Validator
  */
 class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\TypoScriptValidator
 {
-
     /**
      * the child property name which will be validated
      *
      * @var mixed
      */
     protected $childPropertyName;
-
 
     /**
      * the child object to validate

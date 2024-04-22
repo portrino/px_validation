@@ -30,7 +30,6 @@ use Exception;
 use Portrino\PxValidation\Validation\ValidatorResolver;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\Validate;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
@@ -38,12 +37,9 @@ use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
 
 /**
  * Class AbstractValidator
- *
- * @package Portrino\PxValidation\Domain\Validator
  */
 abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator
 {
-
     /**
      * Contains the settings of the current extension
      *
@@ -83,8 +79,6 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @param mixed $object
      * @throws Exception
-     *
-     * @return bool
      */
     protected function isValid(mixed $object): void
     {
@@ -108,7 +102,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                     );
                     if ($newValidator === null) {
                         throw new NoSuchValidatorException(
-                            'Invalid typoscript validation rule in ' . $object . '::' . $validationRule . ': Could not resolve class name for  validator "' . $validatorConfiguration['validatorName'] . '".',
+                            'Invalid typoscript validation rule in ' . $object . '::' . $validationRule . ': Could not resolve class name for  validator "' . $validateAnnotation['validatorName'] . '".',
                             1241098027
                         );
                     }
@@ -121,7 +115,6 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         if (array_key_exists('propertyValidators', $this->validationFields) &&
             is_array($this->validationFields['propertyValidators'])) {
             foreach ($this->validationFields['propertyValidators'] as $validationField => $validationRules) {
-
                 /**
                  *  if the property to validate is a child property then create a new $typoScriptChildValidator
                  *  with the validation config of the child
@@ -166,6 +159,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                 }
             }
         }
+        unset($objectValidator);
 
         foreach ($objectValidators as $objectValidator) {
             if ($objectValidator instanceof TypoScriptChildValidator) {
