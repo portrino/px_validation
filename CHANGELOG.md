@@ -1,19 +1,48 @@
 # PxValidation Changelog
 
+#### 2024-04-22
+* [!!!][WIP] updates several classes for TYPO3 v12 compatibility
+* [TASK] adds .github/workflow
+* [CLEANUP] updates CHANGELOG and README
+
 #### 2023-03-03
 * [TASK] updates several classes and configuration files to be compatible with TYPO3 v12 core
 * [TASK] adds TYPO3 v12 to allowed typo3/cms-core dependency
 
-3.0.0 2022-03-08
-----------------
+3.0.0 - 2023-03-17
+------------------
+* [CLEANUP] updates CHANGELOG and README
+
+#### 2022-03-24
+* [CLEANUP] updates removes obsolete use statement in ReflectionService
+* [WIP] updates several classes regarding TYPO3 v11 compability and re-adds Configuration/Services.yaml
+
+#### 2022-03-18
+* [CLEANUP] small code formatting
+
+#### 2022-03-15
+* [TASK] removes Configuration/Services.yaml
+
+#### 2022-03-08
 * [TASK] updates ClassSchema XClass to be compatible with TYPO3 v11 core
-* [TASK] updates XClasses registration in ext_localconf 
+* [TASK] updates XClasses registration in ext_localconf
+
+2.0.1 - 2023-03-17
+------------------
+* [CLEANUP] updates README
+
+2.0.0 - 2022-03-08
+------------------
+#### 2022-03-08
+* [TASK] reverts TYPO3 v11 compatibility for current master
+
+#### 2022-03-07
+* [CLEANUP] updates replace section in composer.json
+* [TASK] updates CHANGELOG and README
 
 #### 2022-01-17
 * [TASK] adds TYPO3 v11 to allowed typo3/cms-core dependency
- 
-2.0.0 - 2012-03-07
-------------------
+
 #### 2021-12-16
 * [CLEANUP] remove obsolete code from ValidatorResolver
 
@@ -55,7 +84,6 @@
 ------------------
 * extends `composer.json` with some information
 * anonymous function to initialize the extension
-
 
 1.0.0 - 2016-01-19
 ------------------
