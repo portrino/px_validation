@@ -28,18 +28,15 @@ namespace Portrino\PxValidation\Domain\Validator;
 
 /**
  * Class TypoScriptChildValidator
- * @package Portrino\PxValidation\Domain\Validator
  */
 class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\TypoScriptValidator
 {
-
     /**
      * the child property name which will be validated
      *
      * @var mixed
      */
     protected $childPropertyName;
-
 
     /**
      * the child object to validate
@@ -51,7 +48,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @param array $validationFields
      */
-    public function setValidationFields($validationFields)
+    public function setValidationFields(array $validationFields): void
     {
         $this->validationFields = $validationFields;
     }
@@ -61,7 +58,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
      *
      * @return array
      */
-    protected function getValidationFields()
+    protected function getValidationFields(): array
     {
         return $this->validationFields;
     }
@@ -69,7 +66,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @return mixed
      */
-    public function getChildPropertyName()
+    public function getChildPropertyName(): mixed
     {
         return $this->childPropertyName;
     }
@@ -77,7 +74,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @param mixed $childPropertyName
      */
-    public function setChildPropertyName($childPropertyName)
+    public function setChildPropertyName(mixed $childPropertyName): void
     {
         $this->childPropertyName = $childPropertyName;
     }
@@ -85,7 +82,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @return mixed
      */
-    public function getChildObject()
+    public function getChildObject(): mixed
     {
         return $this->childObject;
     }
@@ -93,7 +90,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * @param mixed $childObject
      */
-    public function setChildObject($childObject)
+    public function setChildObject(mixed $childObject): void
     {
         $this->childObject = $childObject;
     }

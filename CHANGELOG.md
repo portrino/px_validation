@@ -1,5 +1,14 @@
 # PxValidation Changelog
 
+#### 2024-04-22
+* [!!!][WIP] updates several classes for TYPO3 v12 compatibility
+* [TASK] adds .github/workflow
+* [CLEANUP] updates CHANGELOG and README
+
+#### 2023-03-03
+* [TASK] updates several classes and configuration files to be compatible with TYPO3 v12 core
+* [TASK] adds TYPO3 v12 to allowed typo3/cms-core dependency
+
 3.0.0 - 2023-03-17
 ------------------
 * [CLEANUP] updates CHANGELOG and README

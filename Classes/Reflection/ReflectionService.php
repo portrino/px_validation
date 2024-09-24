@@ -19,6 +19,8 @@ use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
+use TYPO3\CMS\Extbase\Validation\Exception\InvalidTypeHintException;
+use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationConfigurationException;
 
 /**
  * Reflection service for acquiring reflection based information.
@@ -26,15 +28,16 @@ use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
  */
 class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
 {
-
     /**
      * Builds class schemata from classes annotated as entities or value objects
      *
      * @param string $className
-     * @throws UnknownClassException
      * @return ClassSchema The class schema
+     * @throws UnknownClassException
+     * @throws InvalidTypeHintException
+     * @throws InvalidValidationConfigurationException
      */
-    protected function buildClassSchema($className): \TYPO3\CMS\Extbase\Reflection\ClassSchema
+    protected function buildClassSchema($className): ClassSchema
     {
         try {
             $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
@@ -74,7 +77,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
                                 'className' => $className,
                                 'methodName' => $methodName,
                                 'argumentName' => $argumentName,
-                                'overwriteDefaultValidation' => $overwriteDefaultValidation
+                                'overwriteDefaultValidation' => $overwriteDefaultValidation,
                             ]
                         );
                     }

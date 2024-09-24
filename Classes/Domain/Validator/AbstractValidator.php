@@ -30,7 +30,6 @@ use Exception;
 use Portrino\PxValidation\Validation\ValidatorResolver;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\Validate;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
@@ -38,28 +37,25 @@ use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
 
 /**
  * Class AbstractValidator
- *
- * @package Portrino\PxValidation\Domain\Validator
  */
 abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator
 {
+    /**
+     * Contains the settings of the current extension
+     *
+     * @var array
+     */
+    protected $settings = [];
 
     /**
      * Contains the settings of the current extension
      *
      * @var array
      */
-    protected $settings;
+    protected $validationFields = [];
 
     /**
-     * Contains the settings of the current extension
-     *
-     * @var array
-     */
-    protected $validationFields;
-
-    /**
-     * @var ConfigurationManager
+     * @var ConfigurationManagerInterface
      */
     protected $configurationManager;
 
@@ -68,13 +64,11 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      */
     protected $validatorResolver;
 
-    public function __construct(array $options = [])
+    public function __construct()
     {
-        parent::__construct($options);
-
         $this->configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
         $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManager::CONFIGURATION_TYPE_SETTINGS,
+            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
             'PxValidation'
         );
         $this->validatorResolver = GeneralUtility::makeInstance(ValidatorResolver::class);
@@ -85,12 +79,9 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @param mixed $object
      * @throws Exception
-     *
-     * @return bool
      */
-    public function isValid($object)
+    protected function isValid(mixed $object): void
     {
-        $result = true;
         $this->validationFields = $this->getValidationFields();
 
         $objectValidators = new ObjectStorage();
@@ -111,7 +102,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                     );
                     if ($newValidator === null) {
                         throw new NoSuchValidatorException(
-                            'Invalid typoscript validation rule in ' . $object . '::' . $validationRule . ': Could not resolve class name for  validator "' . $validatorConfiguration['validatorName'] . '".',
+                            'Invalid typoscript validation rule in ' . $object . '::' . $validationRule . ': Could not resolve class name for  validator "' . $validateAnnotation['validatorName'] . '".',
                             1241098027
                         );
                     }
@@ -124,7 +115,6 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         if (array_key_exists('propertyValidators', $this->validationFields) &&
             is_array($this->validationFields['propertyValidators'])) {
             foreach ($this->validationFields['propertyValidators'] as $validationField => $validationRules) {
-
                 /**
                  *  if the property to validate is a child property then create a new $typoScriptChildValidator
                  *  with the validation config of the child
@@ -169,6 +159,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
                 }
             }
         }
+        unset($objectValidator);
 
         foreach ($objectValidators as $objectValidator) {
             if ($objectValidator instanceof TypoScriptChildValidator) {
@@ -178,12 +169,7 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
             } else {
                 $this->result->merge($objectValidator->validate($object));
             }
-
-            if ($this->result->hasErrors()) {
-                $result = false;
-            }
         }
-        return $result;
     }
 
     /**
@@ -191,5 +177,5 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
      *
      * @return array
      */
-    abstract protected function getValidationFields();
+    abstract protected function getValidationFields(): array;
 }
