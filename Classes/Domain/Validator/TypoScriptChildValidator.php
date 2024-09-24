@@ -46,7 +46,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     protected $childObject;
 
     /**
-     * @param array $validationFields
+     * @param array<string, mixed> $validationFields
      */
     public function setValidationFields(array $validationFields): void
     {
@@ -56,7 +56,7 @@ class TypoScriptChildValidator extends \Portrino\PxValidation\Domain\Validator\T
     /**
      * returns the array of validation fields from typoScript
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function getValidationFields(): array
     {

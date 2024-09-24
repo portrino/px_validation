@@ -1,13 +1,15 @@
 includes:
-	- %currentWorkingDirectory%/.Build/vendor/phpstan/phpstan-strict-rules/rules.neon
-	- %currentWorkingDirectory%/.Build/vendor/phpstan/phpstan-deprecation-rules/rules.neon
-	- %currentWorkingDirectory%/.Build/vendor/friendsoftypo3/phpstan-typo3/extension.neon
+	- ../.Build/vendor/phpstan/phpstan-strict-rules/rules.neon
+	- ../.Build/vendor/phpstan/phpstan-deprecation-rules/rules.neon
+	- ../.Build/vendor/friendsoftypo3/phpstan-typo3/extension.neon
 
 parameters:
-  level: 5
+  level: 8
+  reportMaybesInPropertyPhpDocTypes: false
 
   paths:
-    - %currentWorkingDirectory%/Classes
+    - ../Classes
+
   excludePaths:
       analyse:
-          - %currentWorkingDirectory%/Classes/Reflection/ClassSchema.php
+          - ../Classes/Reflection/ClassSchema.php

@@ -37,7 +37,7 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
     /**
      * Contains the settings of the current extension
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $settings = [];
 
@@ -60,8 +60,8 @@ class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
 
     /**
      * @param string $validateValue
-     * @param array $validatorOptions
-     * @return array
+     * @param array<string, mixed> $validatorOptions
+     * @return object[]
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      */

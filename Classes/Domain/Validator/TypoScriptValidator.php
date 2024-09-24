@@ -32,7 +32,7 @@ namespace Portrino\PxValidation\Domain\Validator;
 class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\AbstractValidator
 {
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected $supportedOptions = [
         'className' => ['', 'Name of the controller class which should be validate', 'string'],
@@ -46,9 +46,9 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
     ];
 
     /**
-     * returns the array of validation fields from typoscript
+     * Returns the array of validation fields from TypoScript
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function getValidationFields(): array
     {
