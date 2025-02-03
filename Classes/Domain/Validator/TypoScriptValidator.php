@@ -46,9 +46,9 @@ class TypoScriptValidator extends \Portrino\PxValidation\Domain\Validator\Abstra
     ];
 
     /**
-     * returns the array of validation fields from typoscript
+     * Returns the array of validation fields from TypoScript
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function getValidationFields(): array
     {

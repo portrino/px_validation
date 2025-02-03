@@ -1,7 +1,5 @@
 <?php
 
-namespace Portrino\PxValidation\Reflection;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -14,6 +12,8 @@ namespace Portrino\PxValidation\Reflection;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+namespace Portrino\PxValidation\Reflection;
 
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -55,7 +55,7 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
         if (isset($settings[$className])) {
             $methodParameters = [];
             foreach ($classSchema->getRawMethods() as $methodName => $method) {
-                if ($method['public'] && $method['params']) {
+                if (isset($method['public'], $method['params'])) {
                     $methodParameters[$methodName] = $method['params'];
                 }
             }
