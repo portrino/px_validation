@@ -18,6 +18,7 @@ namespace Portrino\PxValidation\Reflection;
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Configuration\Exception\NoServerRequestGivenException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 use TYPO3\CMS\Extbase\Validation\Exception\InvalidTypeHintException;
 use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationConfigurationException;
@@ -45,11 +46,16 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
             throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1278450972, $e);
         }
 
-        $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
-        $settings = $configurationManager->getConfiguration(
-            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
-            'PxValidation'
-        );
+        try {
+            $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
+            $settings = $configurationManager->getConfiguration(
+                ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
+                'PxValidation'
+            );
+        } catch (NoServerRequestGivenException $e) {
+            // catch this exception to avoid issues during CLI calls where no request is available
+            $settings = [];
+        }
 
         // add TS validators for all methods of this class
         if (isset($settings[$className])) {
