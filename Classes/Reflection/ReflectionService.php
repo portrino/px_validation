@@ -1,98 +1,32 @@
 <?php
 
-/*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
+declare(strict_types=1);
 
 namespace Portrino\PxValidation\Reflection;
 
-use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Configuration\Exception\NoServerRequestGivenException;
+use TYPO3\CMS\Extbase\Reflection\ClassSchema as CoreClassSchema;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
-use TYPO3\CMS\Extbase\Validation\Exception\InvalidTypeHintException;
-use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationConfigurationException;
 
 /**
- * Reflection service for acquiring reflection based information.
- * Originally based on the TYPO3.Flow reflection service.
+ * Replaces the Extbase ReflectionService so that every class schema it builds is
+ * a px_validation ClassSchema. Registered as an XClass in ext_localconf.php.
+ *
+ * Only buildClassSchema() is overridden; everything else (caching, serialization)
+ * is inherited unchanged.
  */
 class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
 {
-    /**
-     * Builds class schemata from classes annotated as entities or value objects
-     *
-     * @param string $className
-     * @return ClassSchema The class schema
-     * @throws UnknownClassException
-     * @throws InvalidTypeHintException
-     * @throws InvalidValidationConfigurationException
-     */
-    protected function buildClassSchema($className): ClassSchema
+    protected function buildClassSchema($className): CoreClassSchema
     {
         try {
-            $classSchema = new \Portrino\PxValidation\Reflection\ClassSchema($className);
+            $classSchema = new ClassSchema($className);
         } catch (\ReflectionException $e) {
-            throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1278450972, $e);
-        }
-
-        try {
-            $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
-            $settings = $configurationManager->getConfiguration(
-                ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
-                'PxValidation'
-            );
-        } catch (NoServerRequestGivenException $e) {
-            // catch this exception to avoid issues during CLI calls where no request is available
-            $settings = [];
-        }
-
-        // add TS validators for all methods of this class
-        if (isset($settings[$className])) {
-            $methodParameters = [];
-            foreach ($classSchema->getRawMethods() as $methodName => $method) {
-                if (isset($method['public'], $method['params'])) {
-                    $methodParameters[$methodName] = $method['params'];
-                }
-            }
-
-            foreach ($methodParameters as $methodName => $arguments) {
-                foreach ($arguments as $argumentName => $argumentValue) {
-                    if (isset($settings[$className][$methodName][$argumentName])) {
-                        if (isset($settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'])) {
-                            $overwriteDefaultValidation = (bool)$settings[$className][$methodName][$argumentName]['overwriteDefaultValidation'];
-                        } else {
-                            $overwriteDefaultValidation = false;
-                        }
-
-                        $classSchema->addValidator(
-                            $methodName,
-                            $argumentName,
-                            TypoScriptValidator::class,
-                            [
-                                'className' => $className,
-                                'methodName' => $methodName,
-                                'argumentName' => $argumentName,
-                                'overwriteDefaultValidation' => $overwriteDefaultValidation,
-                            ]
-                        );
-                    }
-                }
-            }
+            throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1782113158, $e);
         }
 
         $this->classSchemata[$className] = $classSchema;
         $this->dataCacheNeedsUpdate = true;
+
         return $classSchema;
     }
 }

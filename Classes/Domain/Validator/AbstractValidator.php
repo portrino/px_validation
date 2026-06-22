@@ -1,83 +1,62 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Portrino\PxValidation\Domain\Validator;
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2016 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
- *
- *  All rights reserved
- *
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
-
-use Portrino\PxValidation\Validation\ValidatorResolver;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Validation\Exception\NoSuchValidatorException;
 use TYPO3\CMS\Extbase\Validation\Validator\GenericObjectValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\ObjectValidatorInterface;
+use TYPO3\CMS\Extbase\Validation\Validator\ValidatorInterface;
+use TYPO3\CMS\Extbase\Validation\ValidatorResolver;
 
 /**
- * Class AbstractValidator
+ * Base for the TypoScript driven validators.
+ *
+ * Since TYPO3 v14 Extbase no longer ships the doctrine/annotations based
+ * DocParser, and \TYPO3\CMS\Extbase\Validation\ValidatorResolver no longer
+ * exposes parseValidatorAnnotation(). The validation rules are therefore read
+ * from a plain, structured TypoScript notation instead of an annotation string:
+ *
+ *     <ruleIndex> {
+ *         validator = <ValidatorName|FQCN>
+ *         options {
+ *             <optionKey> = <optionValue>
+ *         }
+ *     }
  */
 abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator
 {
     /**
-     * Contains the settings of the current extension
-     *
      * @var array<string, mixed>
      */
     protected array $settings = [];
 
     /**
-     * Contains the settings of the current extension
-     *
      * @var array<string, mixed>
      */
     protected array $validationFields = [];
 
-    /**
-     * @var ConfigurationManagerInterface|null
-     */
-    protected ?ConfigurationManagerInterface $configurationManager = null;
-
-    /**
-     * @var ValidatorResolver|null
-     */
     protected ?ValidatorResolver $validatorResolver = null;
 
     public function __construct()
     {
-        $this->configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
-        $this->settings = $this->configurationManager->getConfiguration(
+        $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
+        $this->settings = $configurationManager->getConfiguration(
             ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
             'PxValidation'
         );
+        // v14: the core resolver still offers createValidator(); parseValidatorAnnotation() is gone.
         $this->validatorResolver = GeneralUtility::makeInstance(ValidatorResolver::class);
     }
 
     /**
-     * Check if $value is valid. If it is not valid, needs to add an error to result.
+     * Builds the validator chain from the structured TypoScript configuration
+     * and merges the results into $this->result.
      *
-     * @param mixed $value
      * @throws \Exception
      */
     protected function isValid(mixed $value): void
@@ -85,107 +64,151 @@ abstract class AbstractValidator extends \TYPO3\CMS\Extbase\Validation\Validator
         $this->validationFields = $this->getValidationFields();
 
         $objectValidators = new ObjectStorage();
+
         /** @var GenericObjectValidator $objectValidator */
         $objectValidator = GeneralUtility::makeInstance(GenericObjectValidator::class);
+        $objectValidator->setRequest($this->getRequest());
         $objectValidators->attach($objectValidator);
 
-        // add the configured object validators
-        if (array_key_exists('objectValidators', $this->validationFields) &&
-            is_array($this->validationFields['objectValidators'])) {
-            foreach ($this->validationFields['objectValidators'] as $validationRule) {
-                $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation($validationRule, $this->options);
-                /** @var Validate $validateAnnotation */
-                foreach ($parsedAnnotation as $validateAnnotation) {
-                    $newValidator = $this->validatorResolver->createValidator(
-                        $validateAnnotation->validator,
-                        $validateAnnotation->options
-                    );
-                    if ($newValidator === null) {
-                        throw new NoSuchValidatorException(
-                            'Invalid TypoScript validation rule in ' . $value . '::' . $validationRule . ': Could not resolve class name for  validator "' . $validateAnnotation->__toString() . '".',
-                            1241098027
-                        );
-                    }
-                    $objectValidators->attach($newValidator);
-                }
-            }
+        // object level validators (validate the whole object)
+        foreach ($this->getRules($this->validationFields['objectValidators'] ?? null) as $rule) {
+            $objectValidators->attach($this->createValidatorFromRule($rule, (string)$value));
         }
 
-        // add the configured property validators
-        if (array_key_exists('propertyValidators', $this->validationFields) &&
-            is_array($this->validationFields['propertyValidators'])) {
-            foreach ($this->validationFields['propertyValidators'] as $validationField => $validationRules) {
-                /**
-                 *  if the property to validate is a child property then create a new $typoScriptChildValidator
-                 *  with the validation config of the child
-                 */
-                if (array_key_exists('propertyValidators', $validationRules)) {
-                    /** @var TypoScriptChildValidator $typoScriptChildValidator */
-                    $typoScriptChildValidator = GeneralUtility::makeInstance(TypoScriptChildValidator::class);
-
-                    $typoScriptChildValidator->setValidationFields($validationRules);
-                    $typoScriptChildValidator->setChildPropertyName($validationField);
-                    $callback = [$value, 'get' . $validationField];
-                    if (is_callable($callback)) {
-                        $child = call_user_func_array($callback, []);
-                    } else {
-                        throw new \Exception(
-                            'Getter for property "' . $validationField . '" not callable in class: "' . get_class($value) . '"',
-                            1738340860
-                        );
-                    }
-                    $typoScriptChildValidator->setChildObject($child);
-                    $objectValidators->attach($typoScriptChildValidator);
+        // property level validators
+        if (is_array($this->validationFields['propertyValidators'] ?? null)) {
+            foreach ($this->validationFields['propertyValidators'] as $propertyName => $rules) {
+                if (!is_array($rules)) {
                     continue;
                 }
 
-                // only check if it is not a objectValidator (just check propertyValidators)
-                if (!property_exists($value, $validationField) && ($validationField !== 'objectValidators')) {
+                // nested child object -> delegate to a TypoScriptChildValidator
+                if (array_key_exists('propertyValidators', $rules)) {
+                    $objectValidators->attach($this->buildChildValidator($value, (string)$propertyName, $rules));
+                    continue;
+                }
+
+                if (!property_exists($value, (string)$propertyName)) {
                     throw new \Exception(
-                        'The property: "' . $validationField . '" does not exist for class: "' . get_class($value) . '"',
+                        'The property "' . $propertyName . '" does not exist for class: "' . get_class($value) . '"',
                         1738336088
                     );
                 }
-                foreach ($validationRules as $validationRule) {
-                    $parsedAnnotation = $this->validatorResolver->parseValidatorAnnotation(
-                        $validationRule,
-                        $this->options
+
+                foreach ($this->getRules($rules) as $rule) {
+                    $objectValidator->addPropertyValidator(
+                        (string)$propertyName,
+                        $this->createValidatorFromRule($rule, (string)$value)
                     );
-                    /** @var Validate $validateAnnotation */
-                    foreach ($parsedAnnotation as $validateAnnotation) {
-                        $newValidator = $this->validatorResolver->createValidator(
-                            $validateAnnotation->validator,
-                            $validateAnnotation->options
-                        );
-                        if ($newValidator === null) {
-                            throw new NoSuchValidatorException(
-                                'Invalid TypoScript validation rule in ' . $value . '::' . $validationField . ': Could not resolve class name for  validator "' . $validateAnnotation->__toString() . '".',
-                                1241098027
-                            );
-                        }
-                        $objectValidator->addPropertyValidator($validationField, $newValidator);
-                    }
                 }
             }
         }
         unset($objectValidator);
 
-        /** @var ObjectValidatorInterface $objectValidator */
-        foreach ($objectValidators as $objectValidator) {
-            if ($objectValidator instanceof TypoScriptChildValidator) {
-                $typoScriptChildValidator = $objectValidator;
-                $result = $typoScriptChildValidator->validate($typoScriptChildValidator->getChildObject());
-                $this->result->forProperty($typoScriptChildValidator->getChildPropertyName())->merge($result);
+        /** @var ObjectValidatorInterface $validator */
+        foreach ($objectValidators as $validator) {
+            if ($validator instanceof TypoScriptChildValidator) {
+                $childResult = $validator->validate($validator->getChildObject());
+                $this->result->forProperty($validator->getChildPropertyName())->merge($childResult);
             } else {
-                $this->result->merge($objectValidator->validate($value));
+                $this->result->merge($validator->validate($value));
             }
         }
     }
 
     /**
-     * Returns the array of validation fields from TypoScript
+     * Returns the array of validation fields for the current context.
      *
      * @return array<string, mixed>
      */
     abstract protected function getValidationFields(): array;
+
+    /**
+     * Normalizes a (possibly null) rule container into a list of rule arrays.
+     *
+     * @param mixed $rules
+     * @return array<int, array<string, mixed>>
+     */
+    private function getRules(mixed $rules): array
+    {
+        if (!is_array($rules)) {
+            return [];
+        }
+        // only keep numerically indexed rule definitions
+        return array_values(array_filter(
+            $rules,
+            static fn(mixed $rule, mixed $key): bool => is_numeric($key) && is_array($rule),
+            ARRAY_FILTER_USE_BOTH
+        ));
+    }
+
+    /**
+     * @param array<string, mixed> $rule
+     */
+    private function createValidatorFromRule(array $rule, string $context): ValidatorInterface
+    {
+        $validatorName = (string)($rule['validator'] ?? '');
+        $options = is_array($rule['options'] ?? null) ? $rule['options'] : [];
+
+        $validator = $this->validatorResolver->createValidator(
+            $validatorName,
+            $this->normalizeOptions($options),
+            $this->getRequest()
+        );
+
+        if ($validator === null) {
+            throw new NoSuchValidatorException(
+                'Invalid TypoScript validation rule in ' . $context . ': could not resolve validator "'
+                . $validatorName . '".',
+                1241098027
+            );
+        }
+
+        return $validator;
+    }
+
+    /**
+     * @param array<string, mixed> $rules
+     */
+    private function buildChildValidator(mixed $value, string $propertyName, array $rules): TypoScriptChildValidator
+    {
+        /** @var TypoScriptChildValidator $childValidator */
+        $childValidator = GeneralUtility::makeInstance(TypoScriptChildValidator::class);
+        $childValidator->setRequest($this->getRequest());
+        $childValidator->setValidationFields($rules);
+        $childValidator->setChildPropertyName($propertyName);
+
+        $getter = [$value, 'get' . ucfirst($propertyName)];
+        if (!is_callable($getter)) {
+            throw new \Exception(
+                'Getter for property "' . $propertyName . '" not callable in class: "' . get_class($value) . '"',
+                1738340860
+            );
+        }
+        $childValidator->setChildObject($getter());
+
+        return $childValidator;
+    }
+
+    /**
+     * TypoScript delivers every scalar as a string. We only coerce the literal
+     * strings "true"/"false" to booleans (the most common foot-gun, e.g. the
+     * BooleanValidator "is" option). Everything else is passed through; core
+     * validators tolerate numeric strings. Project validators that require
+     * strictly typed options should cast them themselves.
+     *
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
+    private function normalizeOptions(array $options): array
+    {
+        foreach ($options as $key => $optionValue) {
+            if (is_array($optionValue)) {
+                $options[$key] = $this->normalizeOptions($optionValue);
+            } elseif (is_string($optionValue) && in_array(strtolower($optionValue), ['true', 'false'], true)) {
+                $options[$key] = strtolower($optionValue) === 'true';
+            }
+        }
+        return $options;
+    }
 }
