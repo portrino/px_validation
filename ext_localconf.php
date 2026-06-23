@@ -3,6 +3,23 @@
 defined('TYPO3') || die();
 
 call_user_func(static function () {
+
+    if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('tt_address')) {
+
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+            'PxValidation',
+            'Demo',
+            [
+                \Portrino\PxValidation\Controller\DemoController::class => 'new, create, finish',
+            ],
+            [
+                \Portrino\PxValidation\Controller\DemoController::class => 'create, finish',
+            ],
+            \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+        );
+
+    }
+
     // Transparent, controller-agnostic injection of TypoScript driven validators:
     // the custom ReflectionService builds a ClassSchema that augments controller
     // action arguments with a TypoScriptValidator (additive validation).

@@ -1,150 +1,62 @@
+###
+### Agnostic suppression of a model's built-in (#[Validate] attribute) validators.
+### Per MODEL class (not per action). Works for any controller, no trait required.
+###
+#plugin.tx_pxvalidation.settings {
+#    suppressBaseValidation {
+#        Vendor\ExtensionName\Domain\Model\Foo = 1
+#    }
+#}
+
+###
+### Schema (structured TypoScript notation, TYPO3 v14+)
+###
+#plugin.tx_pxvalidation.settings {
+#    <Controller\FQCN> {
+#        <actionMethodName> {
+#            <argumentName> {#
+#                objectValidators {
+#                    0 {
+#                        validator = VendorName\ExtensionName\Domain\Validator\CustomObjectValidator
+#                        options {
+#                            firstOption = optionValue
+#                            secondOption = optionValue
+#                        }
+#                    }
+#                }
 #
-# Example validation rules using EXT:px_validation (TYPO3 v14 structured notation)
+#                propertyValidators {
+#                    propertyName1 {
+#                        0.validator = NotEmpty
+#                    }
+#                    propertyName2 {
+#                        0.validator = NotEmpty
+#                        1 {
+#                            validator = StringLength
+#                            options {
+#                                minimum = 3
+#                                maximum = 50
+#                            }
+#                        }
+#                        2 {
+#                            validator = VendorName\ExtensionName\Domain\Validator\CustomPropertyValidator
+#                            options.firstOption = optionValue
+#                        }
+#                    }
 #
-plugin.tx_pxvalidation.settings {
-    Portrino\PxRegister\Controller\UserController {
-        createAction {
-            user {
-                # NB: built-in (attribute) validators are suppressed per MODEL via
-                # plugin.tx_pxvalidation.settings.suppressBaseValidation, not here.
-                # The FrontendUser model carries no #[Validate] attributes, so nothing
-                # needs to be suppressed; the rules below run additively.
-                objectValidators {
-                    0 {
-                        validator = Portrino\PxRegister\Domain\Validator\PropertyUniqueValidator
-                        options {
-                            property = email
-                            ignoreEnableFields = true
-                        }
-                    }
-                    1 {
-                        validator = Portrino\PxRegister\Domain\Validator\PropertyCompareValidator
-                        options {
-                            firstProperty = newPassword
-                            secondProperty = newPasswordRepeat
-                            operator = equal
-                        }
-                    }
-                }
-                propertyValidators {
-                    email {
-                        0.validator = NotEmpty
-                        1.validator = EmailAddress
-                    }
-                    salutation {
-                        0.validator = NotEmpty
-                    }
-                    firstName {
-                        0.validator = NotEmpty
-                    }
-                    lastName {
-                        0.validator = NotEmpty
-                    }
-                    newPassword {
-                        0.validator = NotEmpty
-                        1 {
-                            validator = StringLength
-                            options.minimum = 8
-                        }
-                        #2 {
-                        #    validator = Portrino\PxRegister\Domain\Validator\PasswordStrengthValidator
-                        #    options {
-                        #        includesNumber = true
-                        #        includesLetter = true
-                        #        includesCapitalLetter = true
-                        #        includesSymbol = true
-                        #    }
-                        #}
-                    }
-                    terms {
-                        0 {
-                            validator = Boolean
-                            options.is = true
-                        }
-                    }
-                    #captchaResponse {
-                    #    0 {
-                    #        validator = Portrino\SitePackage\Domain\Validator\CaptchaValidator
-                    #        options.after = 0
-                    #    }
-                    #}
-                }
-            }
-        }
-        updateAction {
-            user {
-                objectValidators {
-                    0 {
-                        validator = Portrino\PxRegister\Domain\Validator\PropertyUniqueValidator
-                        options {
-                            property = emailChanged
-                            ignoreEnableFields = true
-                        }
-                    }
-                }
-                propertyValidators {
-                    username {
-                        0.validator = NotEmpty
-                    }
-                    emailChanged {
-                        0.validator = NotEmpty
-                        1.validator = EmailAddress
-                    }
-                    salutation {
-                        0.validator = NotEmpty
-                    }
-                    firstName {
-                        0.validator = NotEmpty
-                    }
-                    lastName {
-                        0.validator = NotEmpty
-                    }
-                }
-            }
-        }
-        updatePasswordAction {
-            user {
-                objectValidators {
-                    0 {
-                        validator = Portrino\PxRegister\Domain\Validator\PasswordCheckValidator
-                    }
-                    1 {
-                        validator = Portrino\PxRegister\Domain\Validator\PropertyCompareValidator
-                        options {
-                            firstProperty = newPassword
-                            secondProperty = newPasswordRepeat
-                            operator = equal
-                        }
-                    }
-                }
-                propertyValidators {
-                    newPassword {
-                        0.validator = NotEmpty
-                        1 {
-                            validator = StringLength
-                            options.minimum = 8
-                        }
-                        #2 {
-                        #    validator = Portrino\PxRegister\Domain\Validator\PasswordStrengthValidator
-                        #    options {
-                        #        includesNumber = true
-                        #        includesLetter = true
-                        #        includesCapitalLetter = true
-                        #        includesSymbol = true
-                        #    }
-                        #}
-                    }
-                }
-            }
-        }
-        deleteAction {
-            user {
-                objectValidators {
-                    0 {
-                        validator = Portrino\PxRegister\Domain\Validator\PasswordCheckValidator
-                    }
-                }
-            }
-        }
-    }
-}
+#                    # nested child object: validate properties of a related object
+#                    childObject {
+#                        propertyValidators {
+#                            subProperty1 {
+#                                0.validator = NotEmpty
+#                            }
+#                            subProperty2 {
+#                                0.validator = NotEmpty
+#                            }
+#                        }
+#                    }
+#                }
+#            }
+#        }
+#    }
+#}

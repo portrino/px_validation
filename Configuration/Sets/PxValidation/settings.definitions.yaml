@@ -1,0 +1,45 @@
+categories:
+  PxValidation:
+    label: 'PxValidation'
+  PxValidation.persistence:
+    label: 'Persistence'
+    parent: PxValidation
+  PxValidation.settings:
+    label: 'Settings'
+    parent: PxValidation
+  PxValidation.view:
+    label: 'View'
+    parent: PxValidation
+
+settings:
+  # Persistence configuration
+  plugin.tx_pxvalidation.persistence.storagePid:
+    label: 'Storage PID'
+    description: 'Page ID for address records'
+    category: PxValidation.persistence
+    type: page
+    default: 0
+
+  # Settings configuration
+
+  # View configuration
+  plugin.tx_pxvalidation.view.layoutRootPath:
+    label: 'Layout Root Path'
+    description: 'Path to the layout templates'
+    category: PxValidation.view
+    type: string
+    default: 'EXT:px_validation/Resources/Private/Layouts/'
+
+  plugin.tx_pxvalidation.view.partialRootPath:
+    label: 'Partial Root Path'
+    description: 'Path to the partial templates'
+    category: PxValidation.view
+    type: string
+    default: 'EXT:px_validation/Resources/Private/Partials/'
+
+  plugin.tx_pxvalidation.view.templateRootPath:
+    label: 'Template Root Path'
+    description: 'Path to the main templates'
+    category: PxValidation.view
+    type: string
+    default: 'EXT:px_validation/Resources/Private/Templates/'
