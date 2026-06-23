@@ -6,6 +6,7 @@ use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 use Rector\ValueObject\PhpVersion;
 use Ssch\TYPO3Rector\CodeQuality\General\ExtEmConfRector;
+use Ssch\TYPO3Rector\CodeQuality\General\GeneralUtilityMakeInstanceToConstructorPropertyRector;
 use Ssch\TYPO3Rector\Configuration\Typo3Option;
 use Ssch\TYPO3Rector\Set\Typo3LevelSetList;
 use Ssch\TYPO3Rector\Set\Typo3SetList;
@@ -17,7 +18,11 @@ return RectorConfig::configure()
         __DIR__ . '/../ext_emconf.php',
         __DIR__ . '/../ext_localconf.php',
     ])
-    ->withSkip([])
+    ->withSkip([
+        GeneralUtilityMakeInstanceToConstructorPropertyRector::class => [
+            __DIR__ . '/../Classes/Validation/ValidatorResolver.php',
+        ],
+    ])
     ->withPhpVersion(PhpVersion::PHP_83)
     ->withSets([
         Typo3SetList::CODE_QUALITY,

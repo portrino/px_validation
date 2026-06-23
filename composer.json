@@ -85,9 +85,7 @@
         "ci:static": [
             "@ci:fractor",
             "@ci:json:lint",
-            "@ci:php:cs-fixer",
-            "@ci:php:lint",
-            "@ci:php:stan",
+            "@ci:php",
             "@ci:ts:lint",
             "@ci:yaml:lint"
         ],

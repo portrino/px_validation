@@ -9,8 +9,8 @@ class Address extends TtAddress
 {
     protected bool $hidden = true;
 
-    #[Validate(['validator' => 'NotEmpty'])]
-    #[Validate(['validator' => 'EmailAddress'])]
+    #[Validate(validator: 'NotEmpty')]
+    #[Validate(validator: 'EmailAddress')]
     protected string $email = '';
 
     public function setEmail(string $email): void

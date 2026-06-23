@@ -56,6 +56,10 @@ parameters:
       message: 'Use PSR-7 API instead'
 
   ignoreErrors:
-      -
-          message: '#Property .*\$supportedOptions type has no value type specified in iterable type array.#'
-          path: ../Classes/Domain/Validator/*
+    -
+      message: '#Method .*Repository::findBy.* should return TYPO3\\CMS\\Extbase\\Persistence\\QueryResultInterface<mixed, .*> but returns TYPO3\\CMS\\Extbase\\Persistence\\QueryResultInterface<int, TYPO3\\CMS\\Extbase\\DomainObject\\DomainObjectInterface>.*#'
+      path: ../Classes/Domain/Repository/*
+
+    -
+      message: '#Property .*\$supportedOptions type has no value type specified in iterable type array.#'
+      path: ../Classes/Domain/Validator/*

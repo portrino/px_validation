@@ -14,8 +14,7 @@ call_user_func(static function () {
             ],
             [
                 \Portrino\PxValidation\Controller\DemoController::class => 'create, finish',
-            ],
-            \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+            ]
         );
 
     }
