@@ -9,20 +9,23 @@ on:
       - master
 
 jobs:
-  testsuite:
-    name: all tests
+  code-quality:
+    name: code quality - php${{ matrix.php }}
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
+
       - name: "Install PHP"
         uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php }}"
           coverage: none
           tools: composer:v2
+
       - name: "Composer Install"
         run: "composer install"
+
       - name: "Run Static Code Analysis"
         run: "composer ci:static"
     strategy:

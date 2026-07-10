@@ -14,7 +14,7 @@
 #plugin.tx_pxvalidation.settings {
 #    <Controller\FQCN> {
 #        <actionMethodName> {
-#            <argumentName> {#
+#            <argumentName> {
 #                objectValidators {
 #                    0 {
 #                        validator = VendorName\ExtensionName\Domain\Validator\CustomObjectValidator

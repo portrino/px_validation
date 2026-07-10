@@ -23,7 +23,7 @@ return RectorConfig::configure()
             __DIR__ . '/../Classes/Validation/ValidatorResolver.php',
         ],
     ])
-    ->withPhpVersion(PhpVersion::PHP_83)
+    ->withPhpVersion(PhpVersion::PHP_84)
     ->withSets([
         Typo3SetList::CODE_QUALITY,
         Typo3SetList::GENERAL,

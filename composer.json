@@ -16,14 +16,14 @@
         "source": "https://github.com/portrino/px_validation"
     },
     "require": {
+        "php": ">= 8.3.0 <= 8.5.99",
         "typo3/cms-backend": "^14.3",
         "typo3/cms-extbase": "^14.3",
         "typo3/cms-fluid": "^14.3",
         "typo3/cms-frontend": "^14.3"
     },
     "require-dev": {
-        "a9f/typo3-fractor": "^0.5",
-        "sebastian/diff": "^8.0",
+        "a9f/typo3-fractor": "^1.0",
         "ergebnis/composer-normalize": "^2.28",
         "friendsofphp/php-cs-fixer": "^3.14",
         "friendsoftypo3/tt-address": "^10.0",
@@ -68,8 +68,16 @@
         "ci": [
             "@ci:static"
         ],
+        "ci:composer": [
+            "@ci:composer:validate",
+            "@ci:composer:audit",
+            "@ci:composer:normalize",
+            "@ci:composer:psr-verify"
+        ],
+        "ci:composer:audit": "@composer audit --abandoned=ignore --ignore-unreachable",
         "ci:composer:normalize": "@composer normalize --no-check-lock --dry-run",
         "ci:composer:psr-verify": "@composer dumpautoload --optimize --strict-psr",
+        "ci:composer:validate": "@composer validate",
         "ci:fractor": "./.Build/bin/fractor process --ansi --config ./Build/fractor.php --dry-run --no-progress-bar",
         "ci:json:lint": "find . ! -path '*.Build/*' ! -path '*node_modules/*' -name '*.json' | xargs -r php .Build/bin/jsonlint -q",
         "ci:php": [
