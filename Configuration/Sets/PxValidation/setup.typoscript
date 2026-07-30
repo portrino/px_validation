@@ -1,0 +1,51 @@
+plugin.tx_pxvalidation {
+    persistence {
+        storagePid = {$plugin.tx_pxvalidation.persistence.storagePid}
+        #recursive = 1
+        classes {
+            Portrino\PxValidation\Domain\Model\Address {
+                newRecordStoragePid = {$plugin.tx_pxvalidation.persistence.storagePid}
+            }
+        }
+    }
+    settings {
+    }
+    view {
+        layoutRootPaths {
+            0 = EXT:px_validation/Resources/Private/Layouts/
+            10 = {$plugin.tx_pxvalidation.view.layoutRootPath}
+        }
+        partialRootPaths {
+            0 = EXT:px_validation/Resources/Private/Partials/
+            10 = {$plugin.tx_pxvalidation.view.partialRootPath}
+        }
+        templateRootPaths {
+            0 = EXT:px_validation/Resources/Private/Templates/
+            10 = {$plugin.tx_pxvalidation.view.templateRootPath}
+        }
+    }
+}
+
+# PxValidation overrides for the demo controller
+plugin.tx_pxvalidation.settings {
+    # disable base validation for the Address model, so we can define our own validation rules
+    suppressBaseValidation {
+        Portrino\PxValidation\Domain\Model\Address = 1
+    }
+
+    Portrino\PxValidation\Controller\DemoController {
+        createAction {
+            newAddress {
+                propertyValidators {
+                    name {
+                        0.validator = NotEmpty
+                    }
+                    email {
+                        0.validator = NotEmpty
+                        1.validator = EmailAddress
+                    }
+                }
+            }
+        }
+    }
+}

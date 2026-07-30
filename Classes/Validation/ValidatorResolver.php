@@ -1,76 +1,76 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Portrino\PxValidation\Validation;
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2016 Andre Wuttig <wuttig@portrino.de>, portrino GmbH
- *
- *  All rights reserved
- *
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
-
-use Doctrine\Common\Annotations\DocParser;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Configuration\Exception\NoServerRequestGivenException;
+use TYPO3\CMS\Extbase\Validation\Validator\ConjunctionValidator;
 
 /**
- * Class ValidatorResolver
+ * Suppresses the built-in (attribute-based) base validator conjunction for
+ * models that are flagged via TypoScript. This is the agnostic, trait-free
+ * counterpart to "overwriteDefaultValidation": instead of replacing the
+ * conjunction per controller action argument (which needs controller code),
+ * built-in validation is switched off per model class.
+ *
+ *   plugin.tx_pxvalidation.settings {
+ *       suppressBaseValidation {
+ *           Vendor\Ext\Domain\Model\Foo = 1
+ *       }
+ *   }
+ *
+ * The base conjunction is produced per data type in getBaseValidatorConjunction()
+ * and consumed by ActionController::initializeActionMethodValidators(), so this
+ * works transparently for any controller.
  */
 class ValidatorResolver extends \TYPO3\CMS\Extbase\Validation\ValidatorResolver
 {
-    /**
-     * Contains the settings of the current extension
-     *
-     * @var array<string, mixed>
-     */
-    protected array $settings = [];
+    public function getBaseValidatorConjunction(
+        string $targetClassName,
+        ?ServerRequestInterface $request = null
+    ): ConjunctionValidator {
+        if ($this->shouldSuppressBaseValidation($targetClassName)) {
+            // empty conjunction -> the model's own #[Validate] attributes are not applied;
+            // only the TypoScript driven validators (injected per argument) remain.
+            return GeneralUtility::makeInstance(ConjunctionValidator::class);
+        }
 
-    /**
-     * @var ConfigurationManagerInterface|null
-     */
-    protected ?ConfigurationManagerInterface $configurationManager = null;
+        return parent::getBaseValidatorConjunction($targetClassName, $request);
+    }
 
-    /**
-     * @param ConfigurationManagerInterface $configurationManager
-     */
-    public function injectConfigurationManager(ConfigurationManagerInterface $configurationManager): void
+    private function shouldSuppressBaseValidation(string $targetClassName): bool
     {
-        $this->configurationManager = $configurationManager;
-        $this->settings = $this->configurationManager->getConfiguration(
-            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
-            'PxValidation'
-        );
+        $suppress = $this->getSettings()['suppressBaseValidation'] ?? null;
+        if (!is_array($suppress)) {
+            return false;
+        }
+
+        $needle = ltrim($targetClassName, '\\');
+        foreach ($suppress as $className => $flag) {
+            if (ltrim((string)$className, '\\') === $needle) {
+                return filter_var($flag, FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
+        return false;
     }
 
     /**
-     * @param string $validateValue
-     * @param array<string, mixed> $validatorOptions
-     * @return list<object>
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
+     * @return array<string, mixed>
      */
-    public function parseValidatorAnnotation(string $validateValue, array $validatorOptions = []): array
+    private function getSettings(): array
     {
-        $context = '';
-        if (array_key_exists('className', $validatorOptions) && array_key_exists('argumentName', $validatorOptions)) {
-            $context = 'property ' . $validatorOptions['className'] . '::$' . $validatorOptions['argumentName'];
+        try {
+            return GeneralUtility::makeInstance(ConfigurationManagerInterface::class)->getConfiguration(
+                ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
+                'PxValidation'
+            );
+        } catch (NoServerRequestGivenException) {
+            return [];
         }
-        return (new DocParser())->parse($validateValue, $context);
     }
 }

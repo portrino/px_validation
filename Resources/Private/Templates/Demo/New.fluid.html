@@ -1,0 +1,32 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default" />
+<f:section name="Main">
+    <f:render partial="FlashMessages" arguments="{_all}" />
+    <f:render partial="ValidationResults"
+              arguments="{object: 'newAddress', languagePrefix: 'tt_address', displayAllValidationResultsAtOnce: '1', displayAllPropertyErrorsAtOnce: '1'}"/>
+
+    <f:form action="create" name="newAddress" object="{newAddress}" pluginName="Demo">
+        <div class="form-floating mb-3">
+            <f:form.textfield
+                class="form-control"
+                id="name"
+                property="name"
+                placeholder="John Doe"
+                type="text"
+            />
+            <label for="name">Name</label>
+        </div>
+        <div class="form-floating mb-3">
+            <f:form.textfield
+                class="form-control"
+                id="email"
+                property="email"
+                placeholder="name@example.com"
+                type="email"
+            />
+            <label for="email">Email address</label>
+        </div>
+        <f:form.submit value="Subscribe" class="btn btn-primary" />
+    </f:form>
+</f:section>
+</html>

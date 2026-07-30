@@ -1,0 +1,81 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:pxv="http://typo3.org/ns/Portrino/PxValidation/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:form.validationResults for="{object}">
+    <f:if condition="{validationResults.flattenedErrors}">
+        <div class="typo3-messages">
+            <f:if condition="{displayAllValidationResultsAtOnce} == 1">
+                <f:then>
+                    <f:for each="{validationResults.flattenedErrors}" key="propertyPath" as="errors">
+                        <f:variable name="errorFieldLabel"><f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}" /></f:variable>
+
+                        <f:if condition="{displayAllPropertyErrorsAtOnce} == 1">
+                            <f:then>
+                                <f:for each="{errors}" as="error">
+                                    <div class="typo3-message message-error alert alert-danger" role="alert" data-error="{error.code}">
+                                        <f:if condition="{errorFieldLabel}">
+                                            <strong><f:format.raw>{errorFieldLabel}:</f:format.raw></strong>
+                                        </f:if>
+                                        <f:format.raw>
+                                            <f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}.error.{error.code}" default="{error.message}" />
+                                        </f:format.raw>
+                                    </div>
+                                </f:for>
+                            </f:then>
+                            <f:else>
+                                <div class="typo3-message message-error alert alert-danger" role="alert" data-error="{error.code}">
+                                    <f:if condition="{errorFieldLabel}">
+                                        <strong><f:format.raw>{errorFieldLabel}:</f:format.raw></strong>
+                                    </f:if>
+                                    <f:format.raw>
+                                        <f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}.error.{errors.0.code}" default="{errors.0.message}" />
+                                    </f:format.raw>
+                                </div>
+                            </f:else>
+                        </f:if>
+                    </f:for>
+                </f:then>
+                <f:else>
+                    <f:for each="{validationResults.flattenedErrors}" key="propertyPath" as="errors" iteration="iterator">
+                        <f:variable name="errorFieldLabel"><f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}" /></f:variable>
+
+                        <f:if condition="{iterator.isFirst}">
+                            <f:then>
+                                <f:if condition="{displayAllPropertyErrorsAtOnce} == 1">
+                                    <f:then>
+                                        <f:for each="{errors}" as="error">
+                                            <div class="typo3-message message-error alert alert-danger" role="alert">
+                                                <f:if condition="{errorFieldLabel}">
+                                                    <strong><f:format.raw>{errorFieldLabel}:</f:format.raw></strong>
+                                                </f:if>
+                                                <f:format.raw>
+                                                    <f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}.error.{error.code}" default="{error.message}" />
+                                                </f:format.raw>
+                                            </div>
+                                        </f:for>
+                                    </f:then>
+                                    <f:else>
+                                        <div class="typo3-message message-error alert alert-danger" role="alert">
+                                            <f:if condition="{errorFieldLabel}">
+                                                <strong><f:format.raw>{errorFieldLabel}:</f:format.raw></strong>
+                                            </f:if>
+                                            <f:format.raw>
+                                                <f:translate key="{f:if(condition: '{languagePrefix}', then: '{languagePrefix}.', else: '')}{propertyPath -> pxv:format.string(format: 'camelCaseToLowerCaseUnderscored')}.error.{errors.0.code}" default="{errors.0.message}" />
+                                            </f:format.raw>
+                                        </div>
+                                    </f:else>
+                                </f:if>
+                            </f:then>
+                            <f:else>
+
+                            </f:else>
+                        </f:if>
+
+                    </f:for>
+                </f:else>
+            </f:if>
+        </div>
+    </f:if>
+</f:form.validationResults>
+</html>

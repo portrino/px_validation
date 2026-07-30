@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="EXT:kvs_newsletter/Resources/Private/Language/locallang_tca.xlf" date="2025-05-16T14:40:47Z" product-name="kvs_newsletter">
+        <header/>
+        <body>
+            <trans-unit id="tt_address.name">
+                <source>Name</source>
+            </trans-unit>
+            <trans-unit id="tt_address.name.error.1221560718">
+                <source>This field is required.</source>
+            </trans-unit>
+            <trans-unit id="tt_address.email">
+                <source>Email address</source>
+            </trans-unit>
+            <trans-unit id="tt_address.email.error.1221560718">
+                <source>This field is required.</source>
+            </trans-unit>
+            <trans-unit id="tt_address.email.error.1221559976">
+                <source>The given email address is invalid!</source>
+            </trans-unit>
+
+            <trans-unit id="flash.info.updated">
+                <source>The address record has been updated.</source>
+            </trans-unit>
+            <trans-unit id="flash.ok.created">
+                <source>The address record has been created.</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

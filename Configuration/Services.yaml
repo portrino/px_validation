@@ -6,4 +6,6 @@ services:
 
     Portrino\PxValidation\:
         resource: '../Classes/*'
-        exclude: '../Classes/Reflection/*'
+        exclude:
+          - '../Classes/Domain/Model/*'
+          - '../Classes/Reflection/*'
