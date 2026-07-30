@@ -8,13 +8,10 @@ $EM_CONF[$_EXTKEY] = [
     'author_email' => 'support@portrino.de',
     'author_company' => 'portrino GmbH',
     'state' => 'stable',
-    'uploadfolder' => false,
-    'createDirs' => '',
-    'clearCacheOnLoad' => true,
-    'version' => '4.0.0',
+    'version' => '5.0.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.0.0-12.5.99',
+            'typo3' => '13.4.0-13.4.99',
         ],
         'conflicts' => [],
         'suggests' => [

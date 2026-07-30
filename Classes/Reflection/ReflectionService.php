@@ -1,7 +1,5 @@
 <?php
 
-namespace Portrino\PxValidation\Reflection;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -15,9 +13,12 @@ namespace Portrino\PxValidation\Reflection;
  * The TYPO3 project - inspiring people to share!
  */
 
+namespace Portrino\PxValidation\Reflection;
+
 use Portrino\PxValidation\Domain\Validator\TypoScriptValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Configuration\Exception\NoServerRequestGivenException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 use TYPO3\CMS\Extbase\Validation\Exception\InvalidTypeHintException;
 use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationConfigurationException;
@@ -45,17 +46,22 @@ class ReflectionService extends \TYPO3\CMS\Extbase\Reflection\ReflectionService
             throw new UnknownClassException($e->getMessage() . '. Reflection failed.', 1278450972, $e);
         }
 
-        $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
-        $settings = $configurationManager->getConfiguration(
-            ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
-            'PxValidation'
-        );
+        try {
+            $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
+            $settings = $configurationManager->getConfiguration(
+                ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS,
+                'PxValidation'
+            );
+        } catch (NoServerRequestGivenException $e) {
+            // catch this exception to avoid issues during CLI calls where no request is available
+            $settings = [];
+        }
 
         // add TS validators for all methods of this class
         if (isset($settings[$className])) {
             $methodParameters = [];
             foreach ($classSchema->getRawMethods() as $methodName => $method) {
-                if ($method['public'] && $method['params']) {
+                if (isset($method['public'], $method['params'])) {
                     $methodParameters[$methodName] = $method['params'];
                 }
             }

@@ -16,19 +16,21 @@
         "source": "https://github.com/portrino/px_validation"
     },
     "require": {
-        "typo3/cms-extbase": "^12.4"
+        "typo3/cms-extbase": "^13.4"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.28",
         "friendsofphp/php-cs-fixer": "^3.14",
-        "friendsoftypo3/phpstan-typo3": "^0.9",
         "helmich/typo3-typoscript-lint": "^3.1",
-        "php-coveralls/php-coveralls": "^2.5",
-        "phpstan/phpstan": "^1.10",
-        "phpstan/phpstan-deprecation-rules": "^1.1",
-        "phpstan/phpstan-strict-rules": "^1.5",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
         "seld/jsonlint": "^1.9",
-        "typo3/coding-standards": "^0.6"
+        "spaze/phpstan-disallowed-calls": "^4.0",
+        "ssch/typo3-rector": "^3.0",
+        "tomasvotruba/cognitive-complexity": "^1.0",
+        "tomasvotruba/type-coverage": "^2.0",
+        "typo3/coding-standards": "^0.8"
     },
     "replace": {
         "typo3-ter/px-validation": "*"
@@ -65,7 +67,6 @@
         "ci:php": [
             "@ci:php:cs-fixer",
             "@ci:php:lint",
-            "@ci:php:sniff",
             "@ci:php:stan"
         ],
         "ci:php:cs-fixer": "./.Build/bin/php-cs-fixer fix --config ./Build/php-cs-fixer.php -v --dry-run --using-cache no --diff",

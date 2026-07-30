@@ -20,20 +20,18 @@ namespace Portrino\PxValidation\Reflection;
 use Doctrine\Common\Annotations\AnnotationReader;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\DocBlockFactoryInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\Type;
-use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Type\BitSet;
-use TYPO3\CMS\Core\Utility\ClassNamingUtility;
+use TYPO3\CMS\Extbase\Annotation\FileUpload;
 use TYPO3\CMS\Extbase\Annotation\IgnoreValidation;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Annotation\Validate;
-use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\DomainObject\AbstractValueObject;
 use TYPO3\CMS\Extbase\Mvc\Controller\ControllerInterface;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchMethodException;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
@@ -51,14 +49,7 @@ use TYPO3\CMS\Extbase\Validation\ValidatorClassNameResolver;
  */
 class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 {
-    private const BIT_CLASS_IS_ENTITY = 1 << 0;
-    private const BIT_CLASS_IS_VALUE_OBJECT = 1 << 1;
-    private const BIT_CLASS_IS_AGGREGATE_ROOT = 1 << 2;
     private const BIT_CLASS_IS_CONTROLLER = 1 << 3;
-    private const BIT_CLASS_IS_SINGLETON = 1 << 4;
-    private const BIT_CLASS_HAS_CONSTRUCTOR = 1 << 5;
-    private const BIT_CLASS_HAS_INJECT_METHODS = 1 << 6;
-    private const BIT_CLASS_HAS_INJECT_PROPERTIES = 1 << 7;
 
     /**
      * @var BitSet
@@ -94,20 +85,8 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
      */
     protected $methods = [];
 
-    /**
-     * @var array
-     */
-    protected $injectMethods = [];
-
-    /**
-     * @var PropertyInfoExtractor
-     */
-    private static $propertyInfoExtractor;
-
-    /**
-     * @var DocBlockFactory
-     */
-    private static $docBlockFactory;
+    private static ?PropertyInfoExtractor $propertyInfoExtractor = null;
+    private static ?DocBlockFactoryInterface $docBlockFactory = null;
 
     /**
      * Constructs this class schema
@@ -125,25 +104,8 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
         $reflectionClass = new \ReflectionClass($className);
 
-        if ($reflectionClass->implementsInterface(SingletonInterface::class)) {
-            $this->bitSet->set(self::BIT_CLASS_IS_SINGLETON);
-        }
-
         if ($reflectionClass->implementsInterface(ControllerInterface::class)) {
             $this->bitSet->set(self::BIT_CLASS_IS_CONTROLLER);
-        }
-
-        if ($reflectionClass->isSubclassOf(AbstractEntity::class)) {
-            $this->bitSet->set(self::BIT_CLASS_IS_ENTITY);
-
-            $possibleRepositoryClassName = ClassNamingUtility::translateModelNameToRepositoryName($className);
-            if (class_exists($possibleRepositoryClassName)) {
-                $this->bitSet->set(self::BIT_CLASS_IS_AGGREGATE_ROOT);
-            }
-        }
-
-        if ($reflectionClass->isSubclassOf(AbstractValueObject::class)) {
-            $this->bitSet->set(self::BIT_CLASS_IS_VALUE_OBJECT);
         }
 
         if (self::$propertyInfoExtractor === null) {
@@ -159,24 +121,25 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
         }
 
         if (self::$docBlockFactory === null) {
-            self::$docBlockFactory = DocBlockFactory::createInstance();
-            self::$docBlockFactory->registerTagHandler('author', Null_::class);
-            self::$docBlockFactory->registerTagHandler('covers', Null_::class);
-            self::$docBlockFactory->registerTagHandler('deprecated', Null_::class);
-            self::$docBlockFactory->registerTagHandler('link', Null_::class);
-            self::$docBlockFactory->registerTagHandler('method', Null_::class);
-            self::$docBlockFactory->registerTagHandler('property-read', Null_::class);
-            self::$docBlockFactory->registerTagHandler('property', Null_::class);
-            self::$docBlockFactory->registerTagHandler('property-write', Null_::class);
-            self::$docBlockFactory->registerTagHandler('return', Null_::class);
-            self::$docBlockFactory->registerTagHandler('see', Null_::class);
-            self::$docBlockFactory->registerTagHandler('since', Null_::class);
-            self::$docBlockFactory->registerTagHandler('source', Null_::class);
-            self::$docBlockFactory->registerTagHandler('throw', Null_::class);
-            self::$docBlockFactory->registerTagHandler('throws', Null_::class);
-            self::$docBlockFactory->registerTagHandler('uses', Null_::class);
-            self::$docBlockFactory->registerTagHandler('var', Null_::class);
-            self::$docBlockFactory->registerTagHandler('version', Null_::class);
+            self::$docBlockFactory = DocBlockFactory::createInstance([
+                'author' => Null_::class,
+                'covers' => Null_::class,
+                'deprecated' => Null_::class,
+                'link' => Null_::class,
+                'method' => Null_::class,
+                'property-read' => Null_::class,
+                'property' => Null_::class,
+                'property-write' => Null_::class,
+                'return' => Null_::class,
+                'see' => Null_::class,
+                'since' => Null_::class,
+                'source' => Null_::class,
+                'throw' => Null_::class,
+                'throws' => Null_::class,
+                'uses' => Null_::class,
+                'var' => Null_::class,
+                'version' => Null_::class,
+            ]);
         }
 
         $this->reflectProperties($reflectionClass);
@@ -191,34 +154,31 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
     {
         $annotationReader = new AnnotationReader();
 
-        $classHasInjectProperties = false;
-        $defaultProperties = $reflectionClass->getDefaultProperties();
-
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+            if ($reflectionProperty->isStatic()) {
+                continue;
+            }
+
             $propertyName = $reflectionProperty->getName();
-            // according to https://www.php.net/manual/en/reflectionclass.getdefaultproperties.php
-            // > This method only works for static properties when used on internal classes. The default
-            // > value of a static class property can not be tracked when using this method on user defined classes.
-            $defaultPropertyValue = $reflectionProperty->isStatic() ? null : $defaultProperties[$propertyName] ?? null;
 
             $propertyCharacteristicsBit = 0;
             $propertyCharacteristicsBit += $reflectionProperty->isPrivate() ? PropertyCharacteristics::VISIBILITY_PRIVATE : 0;
             $propertyCharacteristicsBit += $reflectionProperty->isProtected() ? PropertyCharacteristics::VISIBILITY_PROTECTED : 0;
             $propertyCharacteristicsBit += $reflectionProperty->isPublic() ? PropertyCharacteristics::VISIBILITY_PUBLIC : 0;
-            $propertyCharacteristicsBit += $reflectionProperty->isStatic() ? PropertyCharacteristics::IS_STATIC : 0;
 
             $this->properties[$propertyName] = [
                 'c' => null, // cascade
-                'd' => $defaultPropertyValue, // defaultValue
-                'e' => null, // elementType
+                'f' => null, // file upload
                 't' => null, // type
                 'v' => [], // validators
             ];
 
             $validateAttributes = [];
+            $fileUploadAttributes = [];
             foreach ($reflectionProperty->getAttributes() as $attribute) {
                 match ($attribute->getName()) {
                     Validate::class => $validateAttributes[] = $attribute,
+                    FileUpload::class => $fileUploadAttributes[] = $attribute,
                     Lazy::class => $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_LAZY,
                     Transient::class => $propertyCharacteristicsBit += PropertyCharacteristics::ANNOTATED_TRANSIENT,
                     Cascade::class => $this->properties[$propertyName]['c'] = ($attribute->newInstance())->value,
@@ -236,12 +196,24 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 ];
             }
 
+            foreach ($fileUploadAttributes as $attribute) {
+                $fileUpload = $attribute->newInstance();
+
+                $this->properties[$propertyName]['f'] = [
+                    'validation' => $fileUpload->validation,
+                    'uploadFolder' => $fileUpload->uploadFolder,
+                    'addRandomSuffix' => $fileUpload->addRandomSuffix,
+                    'duplicationBehavior' => $fileUpload->duplicationBehavior,
+                    'createUploadFolderIfNotExist' => $fileUpload->createUploadFolderIfNotExist,
+                ];
+            }
+
             $annotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
             /** @var array<int, Validate> $validateAnnotations */
             $validateAnnotations = array_filter(
                 $annotations,
-                static fn (object $annotation): bool => $annotation instanceof Validate
+                static fn(object $annotation): bool => $annotation instanceof Validate
             );
 
             if (count($validateAnnotations) > 0) {
@@ -252,6 +224,24 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                         'name' => $validateAnnotation->validator,
                         'options' => $validateAnnotation->options,
                         'className' => $validatorObjectName,
+                    ];
+                }
+            }
+
+            /** @var array<int, FileUpload> $fileUploadAnnotations */
+            $fileUploadAnnotations = array_filter(
+                $annotations,
+                static fn(object $annotation): bool => $annotation instanceof FileUpload
+            );
+
+            if (count($fileUploadAnnotations) > 0) {
+                foreach ($fileUploadAnnotations as $fileUploadAnnotation) {
+                    $this->properties[$propertyName]['f'] = [
+                        'validation' => $fileUploadAnnotation->validation,
+                        'uploadFolder' => $fileUploadAnnotation->uploadFolder,
+                        'addRandomSuffix' => $fileUploadAnnotation->addRandomSuffix,
+                        'duplicationBehavior' => $fileUploadAnnotation->duplicationBehavior,
+                        'createUploadFolderIfNotExist' => $fileUploadAnnotation->createUploadFolderIfNotExist,
                     ];
                 }
             }
@@ -278,10 +268,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 $this->properties[$propertyName]['t'][] = $type;
             }
         }
-
-        if ($classHasInjectProperties) {
-            $this->bitSet->set(self::BIT_CLASS_HAS_INJECT_PROPERTIES);
-        }
     }
 
     /**
@@ -296,18 +282,18 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
         $annotationReader = new AnnotationReader();
 
         foreach ($reflectionClass->getMethods() as $reflectionMethod) {
+            if ($reflectionMethod->isStatic()) {
+                continue;
+            }
+
             $methodName = $reflectionMethod->getName();
 
             $this->methods[$methodName] = [];
             $this->methods[$methodName]['private']      = $reflectionMethod->isPrivate();
             $this->methods[$methodName]['protected']    = $reflectionMethod->isProtected();
             $this->methods[$methodName]['public']       = $reflectionMethod->isPublic();
-            $this->methods[$methodName]['static']       = $reflectionMethod->isStatic();
-            $this->methods[$methodName]['abstract']     = $reflectionMethod->isAbstract();
             $this->methods[$methodName]['params']       = [];
-            $this->methods[$methodName]['tags']         = [];
-            $this->methods[$methodName]['annotations']  = [];
-            $this->methods[$methodName]['isAction']     = str_ends_with($methodName, 'Action');
+            $isAction = $this->bitSet->get(self::BIT_CLASS_IS_CONTROLLER) && str_ends_with($methodName, 'Action');
 
             $argumentValidators = [];
 
@@ -316,7 +302,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             foreach ($reflectionAttributes as $attribute) {
                 match ($attribute->getName()) {
                     Validate::class => $validateAttributes[] = $attribute,
-                    IgnoreValidation::class => $this->methods[$methodName]['tags']['ignorevalidation'][] = $attribute->newInstance()->argumentName,
                     default => '' // non-extbase attributes
                 };
             }
@@ -326,13 +311,10 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
             /** @var array<int<0, max>, Validate> $validateAnnotations */
             $validateAnnotations = array_filter(
                 $annotations,
-                static fn (object $annotation): bool => $annotation instanceof Validate
+                static fn(object $annotation): bool => $annotation instanceof Validate
             );
 
-            if ($this->methods[$methodName]['isAction']
-                && $this->bitSet->get(self::BIT_CLASS_IS_CONTROLLER)
-                && (count($validateAnnotations) > 0 || $validateAttributes !== [])
-            ) {
+            if ($isAction && (count($validateAnnotations) > 0 || $validateAttributes !== [])) {
                 foreach ($validateAnnotations as $validateAnnotation) {
                     $validatorName = $validateAnnotation->validator;
                     $validatorObjectName = ValidatorClassNameResolver::resolve($validatorName);
@@ -355,12 +337,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                 }
             }
 
-            foreach ($annotations as $annotation) {
-                if ($annotation instanceof IgnoreValidation) {
-                    $this->methods[$methodName]['tags']['ignorevalidation'][] = $annotation->argumentName;
-                }
-            }
-
             $docComment = $reflectionMethod->getDocComment();
             $docComment = is_string($docComment) ? $docComment : '';
 
@@ -369,28 +345,24 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
 
                 $ignoreValidationParameters = array_filter(
                     $annotations,
-                    static fn (object $annotation): bool => $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName
+                    static fn(object $annotation): bool => $annotation instanceof IgnoreValidation && $annotation->argumentName === $parameterName
                 );
 
                 $ignoreValidationParametersFromAttribute = array_filter(
                     $reflectionAttributes,
-                    static fn (\ReflectionAttribute $attribute): bool
+                    static fn(\ReflectionAttribute $attribute): bool
                         => $attribute->getName() === IgnoreValidation::class && $attribute->newInstance()->argumentName === $parameterName
                 );
 
                 $reflectionType = $reflectionParameter->getType();
 
                 $this->methods[$methodName]['params'][$parameterName] = [];
-                $this->methods[$methodName]['params'][$parameterName]['position'] = $parameterPosition; // compat
-                $this->methods[$methodName]['params'][$parameterName]['byReference'] = $reflectionParameter->isPassedByReference(); // compat
                 $this->methods[$methodName]['params'][$parameterName]['array'] = false; // compat
                 $this->methods[$methodName]['params'][$parameterName]['optional'] = $reflectionParameter->isOptional();
                 $this->methods[$methodName]['params'][$parameterName]['allowsNull'] = $reflectionParameter->allowsNull();
-                $this->methods[$methodName]['params'][$parameterName]['class'] = null; // compat
                 $this->methods[$methodName]['params'][$parameterName]['type'] = null;
                 $this->methods[$methodName]['params'][$parameterName]['hasDefaultValue'] = $reflectionParameter->isDefaultValueAvailable();
                 $this->methods[$methodName]['params'][$parameterName]['defaultValue'] = null;
-                $this->methods[$methodName]['params'][$parameterName]['dependency'] = null; // Extbase DI
                 $this->methods[$methodName]['params'][$parameterName]['ignoreValidation'] = $ignoreValidationParameters !== [] || $ignoreValidationParametersFromAttribute !== [];
                 $this->methods[$methodName]['params'][$parameterName]['validators'] = [];
 
@@ -404,12 +376,10 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                     $this->methods[$methodName]['params'][$parameterName]['allowsNull'] = $reflectionType->allowsNull();
                     // A built-in type effectively means "not a class".
                     if ($reflectionType->isBuiltin()) {
-                        $this->methods[$methodName]['params'][$parameterName]['array'] = $reflectionType->getName() === 'array'; // compat
                         $this->methods[$methodName]['params'][$parameterName]['type'] = ltrim($reflectionType->getName(), '\\');
                     } elseif ($reflectionType->getName() === 'self') {
                         // In addition, self cannot be resolved by "new \ReflectionClass('self')",
                         // so treat this as a reference to the current class
-                        $this->methods[$methodName]['params'][$parameterName]['class'] = $reflectionClass->getName();
                         $this->methods[$methodName]['params'][$parameterName]['type'] = ltrim($reflectionClass->getName(), '\\');
                     } else {
                         // This is mainly to confirm that the class exists. If it doesn't, a ReflectionException
@@ -417,9 +387,11 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                         // so that the exception can get caught and recast to a TYPO3-specific exception.
                         /** @var class-string<mixed> $classname */
                         $classname = $reflectionType->getName();
+
+                        // Test if the class can be reflected
+                        /** @noinspection PhpUnusedLocalVariableInspection */
                         $reflection = new \ReflectionClass($classname);
                         // There's a single type declaration that is a class.
-                        $this->methods[$methodName]['params'][$parameterName]['class'] = $reflectionType->getName();
                         $this->methods[$methodName]['params'][$parameterName]['type'] = $reflectionType->getName();
                     }
                 }
@@ -448,21 +420,6 @@ class ClassSchema extends \TYPO3\CMS\Extbase\Reflection\ClassSchema
                         $this->methods[$methodName]['params'][$parameterName]['type'] = ltrim((string)$param->getType(), '\\');
                         $typeDetectedViaDocBlock = true;
                     }
-                }
-
-                // Extbase DI
-                if ($reflectionType instanceof \ReflectionNamedType && !$reflectionType->isBuiltin()
-                    && ($reflectionMethod->isConstructor() || $this->hasInjectMethodName($reflectionMethod))
-                ) {
-                    if ($typeDetectedViaDocBlock) {
-                        $parameterType = $this->methods[$methodName]['params'][$parameterName]['type'];
-                        $errorMessage = <<<MESSAGE
-The type ($parameterType) of parameter \$$parameterName of method $this->className::$methodName() is defined via php DocBlock. Use a proper PHP parameter type hint instead:
-[private|protected|public] function $methodName($parameterType \$$parameterName)
-MESSAGE;
-                        throw new \RuntimeException($errorMessage, 1639224353);
-                    }
-                    $this->methods[$methodName]['params'][$parameterName]['dependency'] = $reflectionType->getName();
                 }
 
                 // Extbase Validation
@@ -496,35 +453,7 @@ MESSAGE;
                     1515073585
                 );
             }
-
-            // Extbase
-            $this->methods[$methodName]['injectMethod'] = false;
-            if ($this->hasInjectMethodName($reflectionMethod)
-                && count($this->methods[$methodName]['params']) === 1
-                && reset($this->methods[$methodName]['params'])['dependency'] !== null
-            ) {
-                $this->methods[$methodName]['injectMethod'] = true;
-                $this->injectMethods[] = $methodName;
-            }
         }
-
-        if (isset($this->methods['__construct'])) {
-            $this->bitSet->set(self::BIT_CLASS_HAS_CONSTRUCTOR);
-        }
-
-        if (count($this->injectMethods) > 0) {
-            $this->bitSet->set(self::BIT_CLASS_HAS_INJECT_METHODS);
-        }
-    }
-
-    /**
-     * Returns the class name this schema is referring to
-     *
-     * @return string The class name
-     */
-    public function getClassName(): string
-    {
-        return $this->className;
     }
 
     /**
@@ -559,19 +488,8 @@ MESSAGE;
     {
         return array_filter(
             $this->getProperties(),
-            static fn (Property $property): bool => !str_starts_with($property->getName(), '_')
+            static fn(Property $property): bool => !str_starts_with($property->getName(), '_')
         );
-    }
-
-    /**
-     * Whether the class is an aggregate root and therefore accessible through
-     * a repository.
-     *
-     * @return bool TRUE if it is managed
-     */
-    public function isAggregateRoot(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_IS_AGGREGATE_ROOT);
     }
 
     /**
@@ -582,11 +500,6 @@ MESSAGE;
     public function hasProperty(string $propertyName): bool
     {
         return array_key_exists($propertyName, $this->properties);
-    }
-
-    public function hasConstructor(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_HAS_CONSTRUCTOR);
     }
 
     /**
@@ -611,72 +524,9 @@ MESSAGE;
         return $this->buildMethodObjects();
     }
 
-    protected function hasInjectMethodName(\ReflectionMethod $reflectionMethod): bool
-    {
-        $methodName = $reflectionMethod->getName();
-        if ($methodName === 'injectSettings' || !$reflectionMethod->isPublic()) {
-            return false;
-        }
-
-        if (
-            str_starts_with($reflectionMethod->getName(), 'inject')
-        ) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @internal
-     */
-    public function isModel(): bool
-    {
-        return $this->isEntity() || $this->isValueObject();
-    }
-
-    /**
-     * @internal
-     */
-    public function isEntity(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_IS_ENTITY);
-    }
-
-    /**
-     * @internal
-     */
-    public function isValueObject(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_IS_VALUE_OBJECT);
-    }
-
-    public function isSingleton(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_IS_SINGLETON);
-    }
-
     public function hasMethod(string $methodName): bool
     {
         return isset($this->methods[$methodName]);
-    }
-
-    public function hasInjectProperties(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_HAS_INJECT_PROPERTIES);
-    }
-
-    public function hasInjectMethods(): bool
-    {
-        return $this->bitSet->get(self::BIT_CLASS_HAS_INJECT_METHODS);
-    }
-
-    /**
-     * @return array|Method[]
-     */
-    public function getInjectMethods(): array
-    {
-        return array_filter($this->buildMethodObjects(), static fn (Method $method): bool => $method->isInjectMethod());
     }
 
     /**
@@ -712,7 +562,7 @@ MESSAGE;
     /*********************** custom *************************/
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getRawMethods(): array
     {
@@ -721,12 +571,16 @@ MESSAGE;
 
     /**
      * @param string $methodName
-     * @param string$argumentName
-     * @param string$validatorClass
-     * @param array $validatorOptions
+     * @param string $argumentName
+     * @param string $validatorClass
+     * @param array<string, mixed> $validatorOptions
      */
-    public function addValidator($methodName, $argumentName, $validatorClass, $validatorOptions)
-    {
+    public function addValidator(
+        string $methodName,
+        string $argumentName,
+        string $validatorClass,
+        array $validatorOptions
+    ): void {
         $this->methods[$methodName]['params'][$argumentName]['validators'][] = [
             'name' => $validatorClass,
             'options' => $validatorOptions,
