@@ -1,6 +1,6 @@
 # TYPO3 Extension `px_validation`
 
-[![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
+[![TYPO3 13](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/13)
 [![Latest Stable Version](https://poser.pugx.org/portrino/px_validation/v/stable)](https://packagist.org/packages/portrino/px_validation)
 [![Total Downloads](https://poser.pugx.org/portrino/px_validation/downloads)](https://packagist.org/packages/portrino/px_validation)
 [![Monthly Downloads](https://poser.pugx.org/portrino/px_validation/d/monthly)](https://packagist.org/packages/portrino/px_validation)
@@ -120,7 +120,8 @@ Please look into the [CHANGELOG file in the extension][4].
 
 | PxValidation | TYPO3      | PHP       | Support / Development                |
 |--------------|------------|-----------|--------------------------------------|
-| 4.0.x        | 12.4       | 8.1 - 8.3 | features, bugfixes, security updates |
+| 5.x          | 13.4       | 8.2 - 8.4 | features, bugfixes, security updates |
+| 4.x          | 12.4       | 8.1 - 8.3 | bugfixes, security updates           |
 | 3.0.x        | 11.5       | 7.4 - 8.2 | bugfixes, security updates           |
 | 2.0.x        | 9.5 - 10.4 | 7.2 - 7.4 | none                                 |
 | 1.2.x        | 9.5        | 7.2 - 7.4 | none                                 |
